@@ -416,12 +416,72 @@ A partir de una línea (eje) y un DEM, genera:
 - un **perfil longitudinal** (distancia acumulada vs cota)
 - y una estimación de **pendientes** por tramos (en %)
 
+
+#### Entradas
+
+- **Capa de líneas de entrada**  
+  Línea o conjunto de líneas que definen el eje a analizar.
+
+- **Modelo Digital del Terreno (DEM)**  
+  Raster con valores de elevación (raster local o WCS).
+
+- **Campo identificador (opcional)**  
+  Permite conservar un identificador del eje en las salidas.
+
+- **Paso de muestreo (m)**  
+  Distancia entre puntos consecutivos donde se muestrea el DEM a lo largo de la línea.
+
+- **Invertir sentido del perfil** (opcional)  
+  Cambia el origen del perfil (inicio ↔ fin de la línea).
+
+---
+
+#### Salidas
+
+1. **Tabla de perfil longitudinal (sin geometría)**  
+   Una fila por muestra, con:
+   - distancia acumulada desde el origen,
+   - cota,
+   - cota suavizada
+   - pendiente (%),
+   - tipo de valor de pendiente (`REAL`, `INTERP`, `EXTRAP`, `NODATA`).
+   - valor del PK (opcional)
+
+   Pensada para:
+   - análisis numérico,
+   - gráficos de perfil longitudinal,
+   - exportación a hojas de cálculo.
+
+2. **Capa de líneas segmentadas (micro-tramos)**  
+   La línea original se divide en segmentos entre muestras consecutivas, con atributos de cota y pendiente, pensados para:
+   - simbología por pendiente,
+   - identificación visual de tramos críticos.
+
+> Nota: esta capa **no conserva valores M**, ya que su objetivo es la representación y análisis del perfil.
+
+---
+#### Paso de muestreo
+
+El **paso de muestreo** controla la resolución del perfil y del cálculo de pendientes:
+
+- Valores **pequeños**:
+  - mayor detalle,
+  - mayor sensibilidad al ruido del DEM,
+  - mayor coste computacional.
+- Valores **grandes**:
+  - perfiles más suaves,
+  - menor detalle,
+  - pueden ocultar cambios locales.
+
+**Recomendación práctica**: Como regla general, aplicar un paso como mínimo de 4x el tamaño del pixel del DEM.
+Si el paso es 0, se calcula automáticamente a partir de la resolución real del DEM, convertida a metros.
+
 #### Modos de muestreo del DEM (resampling)
 
 Controlan cómo se calcula la cota en cada punto muestreado sobre la línea:
 
-- **Nearest neighbour**: toma el valor del píxel más cercano (rápido, puede ser más “escalonado”).
-- **Bilinear**: interpola usando 4 píxeles vecinos (más suave).
+- **Nearest neighbour**: toma el valor del píxel más cercano. Método rápido que conserva los valores originales si bien puede ofrecer un resultado escalonado.
+- **Bilinear**: interpola usando 4 píxeles vecinos, ofreciendo un resultado suave y estable.
 - **Cubic**: interpola usando un vecindario mayor (más suave, más costoso; puede hacer fallback si no se puede calcular).
 
 #### Suavizado (métodos)
@@ -433,13 +493,13 @@ Suaviza la serie de elevaciones para reducir ruido y estabilizar el cálculo de 
   Sustituye cada valor por el promedio de la ventana. Suaviza bastante el ruido, pero puede verse afectada por valores extremos (picos/artefactos).  
   En igualdad de ventana, suele suavizar **más que Savitzky–Golay** y **de forma más “aplanadora”**.
 - **Mediana móvil** (moving median)
-  Sustituye cada valor por la mediana de la ventana. Es más robusta frente a valores extremos, por lo que suele ser una buena opción cuando el DEM tiene artefactos locales.
+  Sustituye cada valor por la mediana de la ventana. Es robusta frente a valores extremos, por lo que suele ser una buena opción cuando el DEM tiene artefactos locales (árboles, puentes...)
 - **Savitzky–Golay**
-  Grado del polinomio ajustado dentro de cada ventana. Con ventana fija: órdenes más altos tienden a seguir más la señal (menos suavizado efectivo), pero pueden capturar ruido si la ventana es pequeña.
+  Suaviza preservando la forma mejor que la media movil, aunque puede introducir ruido ante una ventana pequeña y un orden elevado.
 
 **Ventana de suavizado**
 - Número de muestras usadas en el filtro.
-- Ventanas pequeñas suavizan poco; ventanas grandes suavizan más pero pueden “aplanar” cambios reales.
+- Ventanas pequeñas suavizan poco; ventanas grandes suavizan más pero pueden “aplanar” cambios reales. Tipicamente, 7-15.
 
 **Orden polinómico (Savitzky–Golay)**
 - Grado del polinomio ajustado dentro de cada ventana.
@@ -451,11 +511,17 @@ La pendiente se calcula entre muestras consecutivas como:
 
 - `slope% = 100 * dz / dx`
 
+Donde:
+
+- `dz` es la diferencia de cota,
+- `dx` es la distancia horizontal entre muestras.
+
+> NOTA: Cuando faltan valores de cota consecutivos, la pendiente se interpola o extrapola para mantener una capa de segmentos continua.
+
 #### Recomendaciones
 
-- DEM y línea deben estar en un CRS coherente (proyectado si quieres pendientes en % basadas en metros).
-- Si tu DEM es ruidoso, prueba primero con **mediana móvil** o **Savitzky–Golay**.
-- Ajusta la ventana al espaciado de muestreo: como regla práctica, ventana ~ 5–15 muestras suele ser buen inicio en viario.
+- DEM y línea deben estar en un CRS proyectado para obtener pendientes en % basadas en metros.
+- Ante un DEM ruidoso, se recomienda **mediana móvil** o **Savitzky–Golay**.
 
 ---
 
