@@ -98,7 +98,7 @@ Si esta opción está activada, se genera una tabla cuando se producen:
 - avisos (*warnings*),
 - errores críticos.
 
-#### Ajustes (ADJUSTED / ADJUST_REASON)
+#### 🔎 Ajustes (ADJUSTED / ADJUST_REASON)
 
 Un **ajuste** significa que el algoritmo **sí genera salida**, pero ha tenido que modificar el PK para poder localizarlo.
 
@@ -112,7 +112,7 @@ Motivos:
 - **`OUT_OF_RANGE`**: PK fuera del rango global disponible (`M_min – M_max`) y recortado al extremo más cercano.
 - **`GAP_SNAP`**: PK dentro del rango global, pero en un hueco entre tramos calibrados; se ajusta al PK disponible más cercano (solo si el “ajuste en huecos” está activado)
 
-#### Avisos (*Warnings*)
+#### ⚠️ Avisos (*Warnings*)
 
 Los avisos indican que el algoritmo **ha podido generar salida**, pero que se ha producido alguna situación que conviene revisar:
 
