@@ -29,9 +29,11 @@ L-RAT es un **plugin de Processing para QGIS** orientado a flujos de trabajo de 
   - [5.3. Locate segments from segment table](#53-locate-segments-from-segment-table)
 - [6. Miscellaneous](#6-miscellaneous)
   - [6.1. Extraer curvas y centroides](#61-extraer-curvas-y-centroides)
-  - [6.2. Slope and Longitudinal Profile](#62-slope-and-longitudinal-profile)
-- [7. Licencia](#7-licencia)
-- [8. Autor](#8-autor)
+- [7. Profile & Slope](#7-profile--slope)
+  - [7.1. Slope and Longitudinal Profile](#71-slope-and-longitudinal-profile)
+  - [7.2. Profile Slope Plotter](#72-profile-slope-plotter)
+- [8. Licencia](#8-licencia)
+- [9. Autor](#9-autor)
 
 ---
 
@@ -155,6 +157,7 @@ Los algoritmos aparecen en la **Caja de herramientas de Processing** bajo tres s
 - **Locate points (requires M geometry)**
 - **Locate segments (requires M geometry)**
 - **Miscellaneous**
+- **Profile & Slope**
 
 ---
 
@@ -409,7 +412,11 @@ Cada entidad representa un cluster de centros de curva:
 
 ---
 
-### 6.2. Slope and Longitudinal Profile
+## 7. Profile & Slope
+
+Este grupo reúne herramientas para generar perfiles longitudinales y pendientes a partir de un DEM, y para **graficar** dichos resultados de forma automática.
+
+### 7.1. Slope and Longitudinal Profile
 
 **Qué hace**  
 A partir de una línea (eje) y un DEM, genera:
@@ -419,40 +426,35 @@ A partir de una línea (eje) y un DEM, genera:
 
 #### Entradas
 
-- **Capa de líneas de entrada**  
-  Línea o conjunto de líneas que definen el eje a analizar.
-
-- **Modelo Digital del Terreno (DEM)**  
-  Raster con valores de elevación (raster local o WCS).
-
-- **Campo identificador (opcional)**  
-  Permite conservar un identificador del eje en las salidas.
-
-- **Paso de muestreo (m)**  
-  Distancia entre puntos consecutivos donde se muestrea el DEM a lo largo de la línea.
-
-- **Invertir sentido del perfil** (opcional)  
-  Cambia el origen del perfil (inicio ↔ fin de la línea).
+- **Capa de líneas de entrada**: Línea o conjunto de líneas que definen el eje a analizar.
+- **Modelo Digital del Terreno (DEM)**: Raster con valores de elevación (raster local o WCS).
+- **Campo identificador (opcional)**: Permite conservar un identificador del eje en las salidas.
+- **Paso de muestreo (m)**: Distancia entre puntos consecutivos donde se muestrea el DEM a lo largo de la línea.
+- **Invertir sentido del perfil** (opcional): Cambia el origen del perfil (inicio ↔ fin de la línea).
 
 ---
 
 #### Salidas
 
-1. **Tabla de perfil longitudinal (sin geometría)**  
+1. **Tabla de perfil longitudinal (sin geometría)**: Se integra de modo sencillo con el algoritmo de L-RAT Profile Slope Plotter  
    Una fila por muestra, con:
-   - distancia acumulada desde el origen,
-   - cota,
-   - cota suavizada
-   - pendiente (%),
-   - tipo de valor de pendiente (`REAL`, `INTERP`, `EXTRAP`, `NODATA`).
-   - valor del PK (opcional)
+   -`ID_Segmento`
+   - `Dist_Origen_metros`: distancia acumulada desde el origen,
+   - `Cota_RAW_metros`: cota muestreada
+   - `Cota_SUAV`: cota suavizada
+   - `SLOPE`: pendiente (en %),
+   - `SLOPE_TYPE`: tipo de valor de pendiente (`REAL`, `INTERP`, `EXTRAP`, `NODATA`)
+   
+   Opcionalmente, si se activa **Usar M** añade el valor del PK (opcional):
+   - `m_field_PK_KM`
+   - `m_field_PK_MMM` :contentReference[oaicite:3]{index=3}
 
    Pensada para:
    - análisis numérico,
    - gráficos de perfil longitudinal,
    - exportación a hojas de cálculo.
 
-2. **Capa de líneas segmentadas (micro-tramos)**  
+1. **Capa de líneas segmentadas (micro-tramos)**  
    La línea original se divide en segmentos entre muestras consecutivas, con atributos de cota y pendiente, pensados para:
    - simbología por pendiente,
    - identificación visual de tramos críticos.
@@ -525,14 +527,48 @@ Donde:
 
 ---
 
-## 7. Licencia
+### 7.2. Profile Slope Plotter
+
+**Qué hace**  
+Genera automáticamente gráficos en PNG y un informe HTML (index) a partir de una **tabla/dataset** con:
+- distancia desde el origen (m),
+- cota (perfil),
+- y opcionalmente pendiente (%).
+
+Está **pensado específicamente** para graficar la tabla creada por **“Slope and Longitudinal Profile”**, aunque puede usarse con cualquier tabla compatible.
+
+#### Entradas
+- **Tabla/capa de entrada**: dataset (puede ser sin geometría).
+- **Campo ID (opcional)**: genera un conjunto de gráficos por cada ID.
+- **Campo X**: distancia desde origen en metros (por defecto `Dist_Origen_metros`).
+- **Campo Y**: cota a graficar (por defecto `Cota_SUAV`).
+- **Campo pendiente** (opcional): pendiente en % (por defecto `SLOPE`).
+- **Usar PK** (opcional): si existe un campo PK (km), etiqueta el eje X como `K+MMM`.
+- **Carpeta de salida**: destino de PNG + `index.html`. :contentReference[oaicite:7]{index=7}
+
+#### Salidas
+- **PNG**: por cada ID genera:
+  - Perfil longitudinal
+  - Perfil + pendiente (%)
+- **HTML (index)**: informe con vista previa y enlaces a todos los gráficos. :contentReference[oaicite:8]{index=8}
+
+#### Consejos
+- Si tu tabla viene de “Slope and Longitudinal Profile”, usa por defecto:
+  - X = `Dist_Origen_metros`
+  - Y = `Cota_SUAV`
+  - Pendiente = `SLOPE`
+  - PK = `m_field_PK_KM` (si activaste “Usar M” en el cálculo)
+
+---
+
+## 8. Licencia
 
 Este proyecto se distribuye bajo la **GNU General Public License v3.0 (GPL-3.0)**.  
 Puedes usarlo, modificarlo y compartirlo libremente bajo los términos de esta licencia.
 
 ---
 
-## 8. Autor
+## 9. Autor
 
 - **LinkedIn**: [Javi H. Piris](https://www.linkedin.com/in/javierhpiris)  
 - **GitHub**: [@Javisionario](https://github.com/Javisionario)
