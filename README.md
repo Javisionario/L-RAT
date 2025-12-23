@@ -2,10 +2,10 @@
 
 L-RAT es un **plugin de Processing para QGIS** orientado a flujos de trabajo de **ingeniería viaria e infraestructuras lineales**. Incluye herramientas para:
 
-- **Calibración de geometría M**: obtener PK para puntos y (en próximas versiones) generar/ajustar M en líneas.
-- **Referenciación lineal (PK/M)** sobre líneas calibradas con geometría **LineStringM / MultiLineStringM** (localización de puntos y extracción de tramos).
-- **Elaboración de perfiles longitudinales y pendientes**
-- Utilidades complementarias habituales en análisis de viario (análisis de curvas/centros), pendientes y perfil longitudinal).
+- **Calibración (PK/M)**: añadir información PK/M a geometrías existentes (p. ej., calcular el PK de puntos por proximidad a una red calibrada; o generar/ajustar M en líneas).
+- **Referenciación lineal (PK/M)**: localizar **puntos** y extraer **segmentos** sobre líneas calibradas con geometría **LineStringM / MultiLineStringM**.
+- **Perfiles y pendientes**: calcular perfiles longitudinales y pendientes a partir de un eje y un DEM, y generar gráficos y salidas listas para representación cartográfica.
+- **Misc**: herramientas de análisis geométrico sobre capas lineales (p. ej., detección de curvas y centroides).
 
 [Repositorio](https://github.com/Javisionario/L-RAT)
 
@@ -569,6 +569,7 @@ Está **pensado específicamente** para graficar la tabla creada por **“Slope 
 ## 8. Calibrate M geometry
 
 Este grupo reúne herramientas para **calibrar** o **derivar** valores relacionados con el PK/M con el objetivo de preparar datos (calibrar) para usarlos después en flujos de referenciación lineal.
+Se trata de algoritmos para añadir valores de calibración a geometrías existentes.
 
 ---
 
