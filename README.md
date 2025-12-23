@@ -2,8 +2,10 @@
 
 L-RAT es un **plugin de Processing para QGIS** orientado a flujos de trabajo de **ingeniería viaria e infraestructuras lineales**. Incluye herramientas para:
 
+- **Calibración de geometría M**: obtener PK para puntos y (en próximas versiones) generar/ajustar M en líneas.
 - **Referenciación lineal (PK/M)** sobre líneas calibradas con geometría **LineStringM / MultiLineStringM** (localización de puntos y extracción de tramos).
-- Utilidades complementarias habituales en análisis de viario (curvas/centros, pendientes y perfil longitudinal).
+- **Elaboración de perfiles longitudinales y pendientes**
+- Utilidades complementarias habituales en análisis de viario (análisis de curvas/centros), pendientes y perfil longitudinal).
 
 [Repositorio](https://github.com/Javisionario/L-RAT)
 
@@ -32,8 +34,10 @@ L-RAT es un **plugin de Processing para QGIS** orientado a flujos de trabajo de 
 - [7. Profile & Slope](#7-profile--slope)
   - [7.1. Slope and Longitudinal Profile](#71-slope-and-longitudinal-profile)
   - [7.2. Profile Slope Plotter](#72-profile-slope-plotter)
-- [8. Licencia](#8-licencia)
-- [9. Autor](#9-autor)
+- [8. Calibrate M geometry](#8-calibrate-m-geometry)
+  - [8.1. Calibrate points](#81-calibrate-points)
+- [9. Licencia](#9-licencia)
+- [10. Autor](#10-autor)
 
 ---
 
@@ -152,8 +156,9 @@ Requisito mínimo: **QGIS 3.10**
 
 ## 3. Estructura del plugin
 
-Los algoritmos aparecen en la **Caja de herramientas de Processing** bajo tres subgrupos:
+Los algoritmos aparecen en la **Caja de herramientas de Processing** bajo los siguientes subgrupos:
 
+- **Calibrate M Geometry**
 - **Locate points (requires M geometry)**
 - **Locate segments (requires M geometry)**
 - **Miscellaneous**
@@ -561,14 +566,75 @@ Está **pensado específicamente** para graficar la tabla creada por **“Slope 
 
 ---
 
-## 8. Licencia
+## 8. Calibrate M geometry
+
+Este grupo reúne herramientas para **calibrar** o **derivar** valores relacionados con el PK/M con el objetivo de preparar datos (calibrar) para usarlos después en flujos de referenciación lineal.
+
+---
+
+### 8.1. Calibrate points
+
+**Qué hace**  
+Asigna a cada punto un **PK (km+mmm)** y un valor **M interpolado**, proyectando el punto sobre una capa lineal **calibrada** con geometría M (`LineStringM / MultiLineStringM`).  
+**No modifica** la geometría del punto: añade campos de calibración en atributos.
+
+#### Entradas
+
+- **Capa de puntos a calibrar**
+- **Capa de líneas calibrada (M)** (eje/viario)
+- **Unidades del campo M**: metros o kilómetros
+- **Distancia máxima (búsqueda/proyección)**: umbral para aceptar el emparejado (si el eje más cercano está más lejos, se marca incidencia)
+
+#### Opciones
+
+- **Restringir emparejado por ROUTE_ID** *(recomendado si hay vías paralelas)*  
+  Solo busca coincidencias dentro de la misma ruta/vía.  
+  Requiere indicar el campo `ROUTE_ID` tanto en **puntos** como en **líneas**.
+
+- **Añadir ROUTE_ID a la salida (desde la capa de líneas)**  
+  Copia el identificador de la línea emparejada al punto.  
+  Requiere indicar el campo `ROUTE_ID` en la **capa de líneas**.  
+  Si el campo `ROUTE_ID` ya existe en la capa de puntos, se crea como `ROUTE_ID_MATCH`.
+
+- **Generar tabla de incidencias (solo si existen)** *(avanzado, por defecto desactivado)*  
+  Si está activada, crea una tabla sin geometría **solo si** hubo incidencias.
+
+#### Salidas
+
+1) **Puntos calibrados (con PK/M)**  
+Copia los atributos originales y añade:
+
+- `PK`: PK formateado (`km+mmm`)
+- `M`: valor M interpolado (en las unidades almacenadas en la geometría)
+- `DIST_AXIS`: distancia del punto al eje emparejado (unidades del CRS)
+- `INCIDENCE`: `0/1` (1 si no se pudo calibrar)
+- `INC_TYPE`: motivo de la incidencia cuando `INCIDENCE=1`
+
+2) **Incidencias (tabla)** *(opcional)*  
+Por defecto desactivada. Si se activa y hay incidencias, genera una tabla con:
+- `PT_ID`, `ROUTE_ID`, `PK`, `M`, `DIST_AXIS`, `INC_TYPE`
+
+#### Incidencias (INC_TYPE)
+
+- `BAD_GEOMETRY`: geometría vacía/no válida/no puntual
+- `NO_ROUTE`: falta ROUTE_ID o no existe en la capa de líneas (si se restringe por ruta)
+- `NO_M_VALUES`: no se encuentran segmentos con valores M utilizables
+- `TOO_FAR`: existe proyección, pero supera la distancia máxima
+- `NO_MATCH`: no se pudo obtener una proyección válida con M
+
+#### Recomendación
+
+Para que `DIST_AXIS` esté en metros y el umbral “Distancia máxima” tenga sentido, usa un **CRS proyectado** (no geográfico).
+
+
+## 9. Licencia
 
 Este proyecto se distribuye bajo la **GNU General Public License v3.0 (GPL-3.0)**.  
 Puedes usarlo, modificarlo y compartirlo libremente bajo los términos de esta licencia.
 
 ---
 
-## 9. Autor
+## 10. Autor
 
 - **LinkedIn**: [Javi H. Piris](https://www.linkedin.com/in/javierhpiris)  
 - **GitHub**: [@Javisionario](https://github.com/Javisionario)
