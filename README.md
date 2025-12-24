@@ -20,23 +20,32 @@ L-RAT es un **plugin de Processing para QGIS** orientado a flujos de trabajo de 
   - [1.4. Formato del PK](#14-formato-del-pk)
   - [1.5. Ajuste de PK sobre la geometría: huecos entre tramos calibrados](#15-ajuste-de-pk-sobre-la-geometría-huecos-entre-tramos-calibrados)
   - [1.6. Tabla de incidencias](#16-tabla-de-incidencias)
+
 - [2. Instalación](#2-instalación)
+
 - [3. Estructura del plugin](#3-estructura-del-plugin)
+
 - [4. Locate points (requires M Geometry)](#4-locate-points-requires-m-geometry)
   - [4.1. Locate points](#41-locate-points)
   - [4.2. Locate points from table](#42-locate-points-from-table)
+  
 - [5. Locate segments (requires M Geometry)](#5-locate-segments-requires-m-geometry)
   - [5.1. Locate segments](#51-locate-segments)
   - [5.2. Locate segments from PK table](#52-locate-segments-from-pk-table)
   - [5.3. Locate segments from segment table](#53-locate-segments-from-segment-table)
+  
 - [6. Miscellaneous](#6-miscellaneous)
   - [6.1. Extraer curvas y centroides](#61-extraer-curvas-y-centroides)
+
 - [7. Profile & Slope](#7-profile--slope)
   - [7.1. Slope and Longitudinal Profile](#71-slope-and-longitudinal-profile)
   - [7.2. Profile Slope Plotter](#72-profile-slope-plotter)
+
 - [8. Calibrate M geometry](#8-calibrate-m-geometry)
   - [8.1. Calibrate points](#81-calibrate-points)
   - [8.2. Calibrate lines from distance](#82-calibrate-lines-from-distance)
+  - [8.3. Modify M geometry](#83-modify-m-geometry)
+
 - [9. Licencia](#9-licencia)
 - [10. Autor](#10-autor)
 
@@ -123,8 +132,6 @@ Los avisos indican que el algoritmo **ha podido generar salida**, pero que se ha
 
 - **`SEGMENT_SPLIT`**: El segmento resultante se ha generado en **varias piezas** (`N_PIECES > 1`), normalmente por discontinuidades en la geometría o a que la vía está dividida en varios tramos independientes.
 - **`ODD_PK_IGNORED`** (solo en “Locate segments from PK table”): Se ha encontrado un PK sin pareja y se ha ignorado para la generación de segmentos.
-
----
 
 #### ❌ Errores críticos (*Criticals*)
 
@@ -438,7 +445,6 @@ A partir de una línea (eje) y un DEM, genera:
 - **Paso de muestreo (m)**: Distancia entre puntos consecutivos donde se muestrea el DEM a lo largo de la línea.
 - **Invertir sentido del perfil** (opcional): Cambia el origen del perfil (inicio ↔ fin de la línea).
 
----
 
 #### Salidas
 
@@ -467,7 +473,6 @@ A partir de una línea (eje) y un DEM, genera:
 
 > Nota: esta capa **no conserva valores M**, ya que su objetivo es la representación y análisis del perfil.
 
----
 #### Paso de muestreo
 
 El **paso de muestreo** controla la resolución del perfil y del cálculo de pendientes:
@@ -647,8 +652,6 @@ El algoritmo puede trabajar de dos formas:
 > En vías con **bucles**, geometrías complejas o **ejes paralelos muy próximos**, la proyección al tramo “más cercano” puede producir asignaciones no deseadas.  
 > En estos casos, se recomienda revisar el resultado o calibrar por feature.
 
----
-
 #### Entradas
 
 - **Capa de líneas**  
@@ -659,8 +662,6 @@ El algoritmo puede trabajar de dos formas:
 
 - **Unidades del campo M (salida)**  
   Metros o kilómetros.
-
----
 
 #### Opciones
 
@@ -682,8 +683,6 @@ El algoritmo puede trabajar de dos formas:
   - **Planar**: fuerza distancias planas
   - **Geodesic**: fuerza cálculo geodésico
 
----
-
 #### Salidas
 
 - **Capa de líneas con geometría M** (`LineStringM / MultiLineStringM`)
@@ -696,8 +695,6 @@ Campos añadidos:
 - `STATUS` – estado del proceso
 
 Los atributos originales de la capa se conservan.
-
----
 
 #### STATUS y mensajes en el log
 
@@ -720,8 +717,6 @@ El campo `STATUS` y el log de Processing permiten identificar el resultado de ca
 
 Los *warnings* y *criticals* se reportan explícitamente en el **log de Processing**, junto con un resumen final por tipo.
 
----
-
 #### Recomendaciones
 
 - Usa un **CRS proyectado en metros** siempre que sea posible.
@@ -729,8 +724,87 @@ Los *warnings* y *criticals* se reportan explícitamente en el **log de Processi
 - Para capas complejas:
   - revisa visualmente el resultado,
   - considera calibrar por feature en lugar de por ROUTE_ID.
+ 
+---
+
+ ### 8.3. Modify M geometry
+
+**Qué hace**  
+Modifica los valores **M** existentes en una capa `LineStringM / MultiLineStringM` mediante operaciones típicas de recalibración.  
+No cambia X/Y (ni Z); solo reescribe **M** en los vértices.
+
+Está pensado para:
+- corregir errores de calibración,
+- convertir unidades,
+- invertir el sentido kilométrico,
+- normalizar orígenes,
+- limpiar pequeños “rebotes” en el campo M.
+
+#### Entradas
+
+- **Capa de líneas con M** (`LineStringM / MultiLineStringM`)
+
+#### Operaciones
+
+El algoritmo aplica las operaciones en este orden general: **Factor/Offset → (opcional) Invertir → (opcional) Fijar origen → (opcional) Clamp → (opcional) Monotonía**.
+
+- **Offset**  
+  Desplaza todos los M una cantidad constante: `M' = M + offset`. 
+
+- **Factor**  
+  Escala todos los M: `M' = M * factor`.  
+  Útil para conversión de unidades o recalibración (ej.: km ↔ m).
+
+- **Invertir M (manteniendo rango)**  
+  Invierte el sentido de M sin cambiar el rango, usando: `M' = (Mmin + Mmax) − M`.  
+  El rango `Mmin/Mmax` se calcula por **feature** o por **ROUTE_ID** según el ámbito.
+
+- **Fijar origen (TARGET_START)**  
+  Aplica un desplazamiento uniforme para que el **primer vértice** tenga el M indicado, manteniendo el resto consistente.  
+  En ámbito por `ROUTE_ID`, el origen se calcula de forma común para todas las features de la ruta.
+
+- **Recortar (Clamp) al rango [min, max]**  
+  Limita M a un intervalo mínimo/máximo:  
+  - si `M < min` → `M = min`  
+  - si `M > max` → `M = max`  
+  Sirve para limpiar valores **fuera de rango** sin “remapear” la calibración (no comprime ni estira).  
+  Puede crear tramos **planos** al inicio o al final.
+
+- **Forzar monotonía (limpieza de “rebotes”)**  
+  Corrige inversiones locales de M para que evolucione siempre en el mismo sentido:  
+  - **creciente**: asegura `M[i] >= M[i-1]`  
+  - **decreciente**: asegura `M[i] <= M[i-1]`  
+  La **tolerancia (epsilon)** permite ignorar pequeñas variaciones numéricas antes de corregir.  
+  Esta opción puede “aplanar” pequeños tramos.
+
+#### Validación
+
+- **Requerir M** (avanzado)  
+  - Activado: las features sin M generan *critical* (`NO_M_VALUES`).  
+  - Desactivado: se omiten con *warning* (`SKIPPED_NO_M`).
+
+#### Ámbito (avanzado)
+
+- **Por feature** (recomendado)  
+  Aplica operaciones usando el rango/origen de cada feature.
+
+- **Por ROUTE_ID**  
+  Usa un rango/origen común para varias features (útil si una ruta está partida).  
+  Requiere indicar el campo **ROUTE_ID**.
 
 
+#### Salidas
+
+- **Capa de líneas con M modificado**.  
+- Se añade el campo `STATUS` (p.ej. `OK`, `SKIPPED_NO_M`, `NO_M_VALUES`, `BAD_GEOMETRY`, `NO_ROUTE`).  
+- El log de Processing incluye **warnings** y **criticals** (p.ej. `CLAMP_APPLIED`, `MONO_APPLIED`).
+
+#### Consejo
+
+Si usas **Invertir** o **Fijar origen** en rutas partidas, considera el ámbito **Por ROUTE_ID** para mantener coherencia global.
+
+
+---
 
 ## 9. Licencia
 
