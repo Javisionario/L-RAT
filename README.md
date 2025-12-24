@@ -36,6 +36,7 @@ L-RAT es un **plugin de Processing para QGIS** orientado a flujos de trabajo de 
   - [7.2. Profile Slope Plotter](#72-profile-slope-plotter)
 - [8. Calibrate M geometry](#8-calibrate-m-geometry)
   - [8.1. Calibrate points](#81-calibrate-points)
+  - [8.2. Calibrate lines from distance](#82-calibrate-lines-from-distance)
 - [9. Licencia](#9-licencia)
 - [10. Autor](#10-autor)
 
@@ -626,6 +627,109 @@ Por defecto desactivada. Si se activa y hay incidencias, genera una tabla con:
 #### Recomendación
 
 Para que `DIST_AXIS` esté en metros y el umbral “Distancia máxima” tenga sentido, usa un **CRS proyectado** (no geográfico).
+
+
+### 8.2. Calibrate lines from distance
+
+**Qué hace**  
+Calibra el valor **M** de una capa de líneas en función de la **distancia acumulada al origen**.
+
+El algoritmo puede trabajar de dos formas:
+
+- **Por feature** (modo simple):  
+  Cada línea se calibra de forma independiente, empezando en `Start M`.
+
+- **Por ROUTE_ID** (modo avanzado):  
+  Las líneas se calibran de forma **consistente por ruta**, manteniendo las features originales pero usando una **referencia común por ROUTE_ID**.  
+  Cada vértice se proyecta sobre el tramo más cercano de dicha referencia para obtener su distancia acumulada.
+
+> ⚠️ **Advertencia**  
+> En vías con **bucles**, geometrías complejas o **ejes paralelos muy próximos**, la proyección al tramo “más cercano” puede producir asignaciones no deseadas.  
+> En estos casos, se recomienda revisar el resultado o calibrar por feature.
+
+---
+
+#### Entradas
+
+- **Capa de líneas**  
+  Capa vectorial de líneas, con o sin valores M previos.
+
+- **Start M**  
+  Valor inicial de la calibración (en las unidades de salida).
+
+- **Unidades del campo M (salida)**  
+  Metros o kilómetros.
+
+---
+
+#### Opciones
+
+- **Agrupar por ROUTE_ID**  
+  Calibra por ruta manteniendo las features originales.  
+  Requiere indicar el campo `ROUTE_ID` en la capa de líneas.
+
+- **Sobrescribir M existente**  
+  - **Activado**: recalibra incluso geometrías que ya tengan valores M.  
+  - **Desactivado** (por defecto): las features que ya tienen M se omiten y se marcan con un *warning* (`SKIPPED_HAS_M`).
+
+- **Invertir sentido**  
+  Hace que el valor M **decrezca** en el sentido geométrico de la línea.
+
+- **Modo de longitud** (avanzado)  
+  - **Auto (recomendado)**:  
+    - CRS proyectado → distancias planas  
+    - CRS geográfico → cálculo geodésico usando un CRS proyectado local
+  - **Planar**: fuerza distancias planas
+  - **Geodesic**: fuerza cálculo geodésico
+
+---
+
+#### Salidas
+
+- **Capa de líneas con geometría M** (`LineStringM / MultiLineStringM`)
+
+Campos añadidos:
+
+- `M_START` – valor M inicial de la feature
+- `M_END` – valor M final de la feature
+- `LEN_M` – longitud de la feature en las unidades M de salida
+- `STATUS` – estado del proceso
+
+Los atributos originales de la capa se conservan.
+
+---
+
+#### STATUS y mensajes en el log
+
+El campo `STATUS` y el log de Processing permiten identificar el resultado de cada feature:
+
+- **`OK`**  
+  Calibración correcta.
+
+- **`SKIPPED_HAS_M`** (*warning*)  
+  La feature ya tenía valores M y no se sobrescribió.
+
+- **`ZERO_LENGTH`** (*warning*)  
+  La geometría tiene longitud cero; `M_START = M_END = Start M`.
+
+- **`BAD_GEOMETRY`** (*critical*)  
+  Geometría vacía, inválida o no lineal.
+
+- **`NO_ROUTE`** (*critical*)  
+  Falta `ROUTE_ID` cuando se ha activado la calibración por ruta.
+
+Los *warnings* y *criticals* se reportan explícitamente en el **log de Processing**, junto con un resumen final por tipo.
+
+---
+
+#### Recomendaciones
+
+- Usa un **CRS proyectado en metros** siempre que sea posible.
+- En CRS geográfico, mantén el modo **Auto** o **Geodesic**.
+- Para capas complejas:
+  - revisa visualmente el resultado,
+  - considera calibrar por feature en lugar de por ROUTE_ID.
+
 
 
 ## 9. Licencia
