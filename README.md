@@ -11,7 +11,7 @@ L-RAT es un **plugin de Processing para QGIS** orientado a flujos de trabajo de 
 
 ---
 
-## Índice
+# Índice
 
 - [1. Requisitos y conceptos](#1-requisitos-y-conceptos)
   - [1.1. Qué es una geometría M](#11-qué-es-una-geometría-m)
@@ -45,13 +45,14 @@ L-RAT es un **plugin de Processing para QGIS** orientado a flujos de trabajo de 
   - [8.1. Calibrate points](#81-calibrate-points)
   - [8.2. Calibrate lines from distance](#82-calibrate-lines-from-distance)
   - [8.3. Modify M geometry](#83-modify-m-geometry)
+  - [8.4. Calibrate lines from points (events)](#84-Calibrate-lines-from-points-events)
 
 - [9. Licencia](#9-licencia)
 - [10. Autor](#10-autor)
 
 ---
 
-## 1. Requisitos y conceptos
+# 1. Requisitos y conceptos
 
 ### 1.1. Qué es una geometría M
 
@@ -150,7 +151,7 @@ Cuando se produce un error crítico:
 
 ---
 
-## 2. Instalación
+# 2. Instalación
 
 - **Desde el repositorio oficial de plugins (recomendado)**: cuando esté publicado, instálalo desde **Plugins → Administrar e instalar plugins**.
 - **Desde ZIP/GitHub** (desarrollo):
@@ -162,7 +163,7 @@ Requisito mínimo: **QGIS 3.10**
 
 ---
 
-## 3. Estructura del plugin
+# 3. Estructura del plugin
 
 Los algoritmos aparecen en la **Caja de herramientas de Processing** bajo los siguientes subgrupos:
 
@@ -174,7 +175,7 @@ Los algoritmos aparecen en la **Caja de herramientas de Processing** bajo los si
 
 ---
 
-## 4. Locate points (requires M geometry)
+# 4. Locate points (requires M geometry)
 
 ### Parámetros comunes (puntos)
 
@@ -260,7 +261,7 @@ Localiza puntos usando una **tabla/capa de eventos** donde cada fila contiene un
 
 ---
 
-## 5. Locate segments (requires M geometry)
+# 5. Locate segments (requires M geometry)
 
 Algoritmos para extraer **segmentos** definidos por PK inicio y PK fin sobre una capa lineal calibrada.
 
@@ -287,7 +288,7 @@ Campos típicos en segmentos:
 
 ---
 
-### 5.1. Locate segments
+## 5.1. Locate segments
 
 **Qué hace**  
 Extrae segmentos a partir de pares `ROUTE_ID + PK_INI + PK_FIN` introducidos manualmente.
@@ -312,7 +313,7 @@ Extrae segmentos a partir de pares `ROUTE_ID + PK_INI + PK_FIN` introducidos man
 
 ---
 
-### 5.2. Locate segments from PK table
+## 5.2. Locate segments from PK table
 
 **Qué hace**  
 Genera segmentos desde una tabla donde **cada fila aporta un PK y un identificador de emparejado**. Identifica los segmentos mediante la relación de pares de PKs con dicho identificador que ha de ser unico para cada segmento para un correcto funcionamiento del algoritmo.
@@ -344,7 +345,7 @@ Para cada combinación `(ROUTE_ID, PAIR_ID)`:
 
 ---
 
-### 5.3. Locate segments from segment table
+## 5.3. Locate segments from segment table
 
 **Qué hace**  
 Extrae segmentos desde una **tabla de segmentos** (cada fila define un tramo con PK inicio/fin).
@@ -369,9 +370,9 @@ Extrae segmentos desde una **tabla de segmentos** (cada fila define un tramo con
 
 ---
 
-## 6. Miscellaneous
+# 6. Miscellaneous
 
-### 6.1. Extraer curvas y centroides
+## 6.1. Extraer curvas y centroides
 
 **Qué hace**  
 Extrae segmentos de curva de una capa lineal, calcula radios de curvatura y, opcionalmente, agrupa centros cercanos (clusters). Genera hasta dos capas: **Curvas** y **Centroides**.
@@ -425,11 +426,11 @@ Cada entidad representa un cluster de centros de curva:
 
 ---
 
-## 7. Profile & Slope
+# 7. Profile & Slope
 
 Este grupo reúne herramientas para generar perfiles longitudinales y pendientes a partir de un DEM, y para **graficar** dichos resultados de forma automática.
 
-### 7.1. Slope and Longitudinal Profile
+## 7.1. Slope and Longitudinal Profile
 
 **Qué hace**  
 A partir de una línea (eje) y un DEM, genera:
@@ -538,7 +539,7 @@ Donde:
 
 ---
 
-### 7.2. Profile Slope Plotter
+## 7.2. Profile Slope Plotter
 
 **Qué hace**  
 Genera automáticamente gráficos en PNG y un informe HTML (index) a partir de una **tabla/dataset** con:
@@ -572,14 +573,14 @@ Está **pensado específicamente** para graficar la tabla creada por **“Slope 
 
 ---
 
-## 8. Calibrate M geometry
+# 8. Calibrate M geometry
 
 Este grupo reúne herramientas para **calibrar** o **derivar** valores relacionados con el PK/M con el objetivo de preparar datos (calibrar) para usarlos después en flujos de referenciación lineal.
 Se trata de algoritmos para añadir valores de calibración a geometrías existentes.
 
 ---
 
-### 8.1. Calibrate points
+## 8.1. Calibrate points
 
 **Qué hace**  
 Asigna a cada punto un **PK (km+mmm)** y un valor **M interpolado**, proyectando el punto sobre una capa lineal **calibrada** con geometría M (`LineStringM / MultiLineStringM`).  
@@ -634,7 +635,7 @@ Por defecto desactivada. Si se activa y hay incidencias, genera una tabla con:
 Para que `DIST_AXIS` esté en metros y el umbral “Distancia máxima” tenga sentido, usa un **CRS proyectado** (no geográfico).
 
 
-### 8.2. Calibrate lines from distance
+## 8.2. Calibrate lines from distance
 
 **Qué hace**  
 Calibra el valor **M** de una capa de líneas en función de la **distancia acumulada al origen**.
@@ -727,7 +728,7 @@ Los *warnings* y *criticals* se reportan explícitamente en el **log de Processi
  
 ---
 
- ### 8.3. Modify M geometry
+ ## 8.3. Modify M geometry
 
 **Qué hace**  
 Modifica los valores **M** existentes en una capa `LineStringM / MultiLineStringM` mediante operaciones típicas de recalibración.  
@@ -803,17 +804,148 @@ El algoritmo aplica las operaciones en este orden general: **Factor/Offset → (
 
 Si usas **Invertir** o **Fijar origen** en rutas partidas, considera el ámbito **Por ROUTE_ID** para mantener coherencia global.
 
+---
+
+## 8.4. Calibrate lines from points (events)
+
+Calibra el campo **M** de una capa de líneas a partir de **eventos puntuales** (PK) almacenados en una capa de puntos.  
+Cada punto se proyecta sobre la línea más cercana y se utiliza como **punto de control** para interpolar y asignar el valor M a lo largo del eje.
+
+El resultado es una capa **LineStringM / MultiLineStringM** calibrada según los PK proporcionados.
+
+
+### Entradas
+
+- **Capa de líneas**  
+  Capa lineal a calibrar (con o sin valores M previos).
+
+- **Capa de puntos (eventos)**  
+  Puntos con valores de PK conocidos.
+
+- **Campo PK (en puntos)**  
+  Campo que contiene el valor del PK.
+
+- **Unidades del PK de entrada**  
+  Metros, kilómetros o *Auto* (intenta inferirlo automáticamente).
+
+- **Unidades de salida de M**  
+  Metros o kilómetros.
+
+- **Distancia máxima (búsqueda/proyección)**  
+  Umbral máximo para aceptar el emparejado punto–línea.  
+  Si la línea más cercana está más lejos, el punto se marca como incidencia (`TOO_FAR`) y **no contribuye** a la calibración.
+
+
+### Opciones
+
+- **Restringir emparejado por ROUTE_ID** *(recomendado en redes densas o vías paralelas)*  
+  Fuerza que cada punto solo pueda calibrar la línea con el mismo identificador de ruta.  
+  Requiere indicar el campo `ROUTE_ID` tanto en **puntos** como en **líneas**.
+
+- **Agrupar por ROUTE_ID**  
+  Calibra rutas partidas usando una referencia común por ruta, manteniendo las features originales.  
+  Útil cuando una misma vía está dividida en varios tramos y se quiere una calibración **coherente** en toda la ruta.
+
+- **Modo fuera del rango de controles**  
+  Define cómo se asigna M **antes del primer PK** y **después del último** (zonas sin controles):
+
+  - **Extrapolar:** Continúa la tendencia de calibración usando la pendiente definida por los dos primeros / dos últimos controles (extrapolación lineal).
+
+  - **Recortar (Clamp)**: Fija el valor M al del control extremo más cercano.  
+    Resultado: el tramo fuera de rango queda con M **constante** igual al primer/último PK.
+
+  - **NULL**: No asigna M fuera del rango de controles (valores M quedan como *NULL/NaN*).  
+    Útil si se quiere identificar explícitamente qué tramos no están calibrados por falta de datos.
+
+  MODIFICADORES:
+- **Factor** *(avanzado)*: Escala el valor M final. Útil para conversiones o ajustes globales.  
+  Se aplica como: `M_final = M * factor`.
+- **Offset** *(avanzado)*: Desplaza el valor M final una cantidad constante.  
+  Se aplica como: `M_final = M + offset`.
+
+- **Generar puntos proyectados** *(opcional)* 
+  Genera una capa auxiliar con los puntos proyectados sobre la línea.  
+  Es la forma más rápida de validar:
+  - si los puntos están cayendo en el eje correcto,
+  - si hay puntos demasiado lejos,
+  - y si hay duplicidades o saltos.
+
+- **Generar tabla de incidencias** *(opcional)*  
+  Crea una tabla sin geometría **solo si existen incidencias**.
+
+> Nota sobre *forks/paralelos*: el algoritmo detecta automáticamente geometrías potencialmente ambiguas (bifurcaciones, paralelos cercanos) y emite *warnings* para revisión.
+
+### Salidas
+
+1) **Líneas calibradas (LineStringM / MultiLineStringM)**  
+Conserva los atributos originales y añade:
+
+- `M_START`: valor M inicial del tramo
+- `M_END`: valor M final
+- `LEN_M`: longitud según M (en unidades de salida)
+- `STATUS`: estado del proceso (`OK` u otros estados/avisos)
+
+2) **Puntos proyectados** *(opcional)*  
+Capa auxiliar (puntos) para QA/QC. Campos típicos:
+
+- `PT_ID`: id del punto original
+- `LINE_FID`: feature id de la línea emparejada
+- `PK_RAW`: PK original (tal como estaba en la tabla)
+- `M`: valor M usado como control (ya convertido a unidades de salida y con factor/offset aplicado)
+- `DIST_AXIS`: distancia del punto original al eje (unidades del CRS)
+- `DIST_ALONG`: posición a lo largo del eje (distancia acumulada sobre la línea usada internamente)
+
+3) **Incidencias (tabla)** *(opcional)*  
+Se genera solo si se activa la opción y existen incidencias. Campos típicos:
+
+- `INC_TYPE`: tipo de incidencia
+- `PT_ID`: id del punto
+- `ROUTE_ID`: ruta afectada (si aplica)
+- `PK_RAW`: valor PK original
+- `LINE_FID`: id de la línea (si aplica)
+- `DIST_AXIS`: distancia al eje (si aplica)
+- `DIST_ALONG`: posición a lo largo del eje (si aplica)
+- `NOTE`: descripción breve
+
+
+### Warnings e incidencias más habituales
+
+- `DUPLICATE_POS_IGNORED`  
+  Varios PK proyectan en la misma posición sobre la línea (se ignoran duplicados).
+
+- `NON_MONOTONIC_PK`  
+  Los PK no siguen el orden espacial a lo largo del eje (posible error de PK o de emparejado).
+
+- `TOO_FAR`  
+  El punto está más lejos de la línea que la distancia máxima permitida.
+
+- `NO_MATCH`  
+  No se pudo emparejar el punto con ninguna línea válida.
+
+- `NO_ROUTE`  
+  El `ROUTE_ID` del punto no existe en la capa de líneas (si se restringe por ruta).
+
+- `BAD_GEOMETRY`  
+  Geometría inválida o no puntual.
+
+
+### Recomendaciones
+
+- Usa siempre un **CRS proyectado** para que las distancias y el umbral de búsqueda sean coherentes.
+- En redes complejas, activa **Restringir por ROUTE_ID** y revisa la capa de **puntos proyectados**.
+- Si aparecen avisos `NON_MONOTONIC_PK`, revisa los PK de entrada antes de usar la calibración.
+
 
 ---
 
-## 9. Licencia
+# 9. Licencia
 
 Este proyecto se distribuye bajo la **GNU General Public License v3.0 (GPL-3.0)**.  
 Puedes usarlo, modificarlo y compartirlo libremente bajo los términos de esta licencia.
 
 ---
 
-## 10. Autor
+# 10. Autor
 
 - **LinkedIn**: [Javi H. Piris](https://www.linkedin.com/in/javierhpiris)  
 - **GitHub**: [@Javisionario](https://github.com/Javisionario)
