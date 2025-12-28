@@ -25,28 +25,28 @@ L-RAT es un **plugin de Processing para QGIS** orientado a flujos de trabajo de 
 
 - [3. Estructura del plugin](#3-estructura-del-plugin)
 
-- [4. Locate points (requires M Geometry)](#4-locate-points-requires-m-geometry)
-  - [4.1. Locate points](#41-locate-points)
-  - [4.2. Locate points from table](#42-locate-points-from-table)
+- [4. Calibrate M geometry](#4-calibrate-m-geometry)
+  - [4.1. Calibrate lines from distance](#41-calibrate-lines-from-distance)
+  - [4.2. Calibrate lines from points (events)](#42-calibrate-lines-from-points-events)
+  - [4.3. Calibrate points](#43-calibrate-points)
+  - [4.4. Modify M geometry](#44-modify-m-geometry)
+
+- [5. Locate points (requires M Geometry)](#5-locate-points-requires-m-geometry)
+  - [5.1. Locate points](#51-locate-points)
+  - [5.2. Locate points from table](#52-locate-points-from-table)
   
-- [5. Locate segments (requires M Geometry)](#5-locate-segments-requires-m-geometry)
-  - [5.1. Locate segments](#51-locate-segments)
-  - [5.2. Locate segments from PK table](#52-locate-segments-from-pk-table)
-  - [5.3. Locate segments from segment table](#53-locate-segments-from-segment-table)
+- [6. Locate segments (requires M Geometry)](#6-locate-segments-requires-m-geometry)
+  - [6.1. Locate segments](#61-locate-segments)
+  - [6.2. Locate segments from PK table](#62-locate-segments-from-pk-table)
+  - [6.3. Locate segments from segment table](#63-locate-segments-from-segment-table)
   
-- [6. Miscellaneous](#6-miscellaneous)
-  - [6.1. Extraer curvas y centroides](#61-extraer-curvas-y-centroides)
+- [7. Miscellaneous](#7-miscellaneous)
+  - [7.1. Curve Detection and Curvature Centers](#71-curve-detection-and-curvature-centers)
 
-- [7. Profile & Slope](#7-profile--slope)
-  - [7.1. Slope and Longitudinal Profile](#71-slope-and-longitudinal-profile)
-  - [7.2. Profile Slope Plotter](#72-profile-slope-plotter)
-
-- [8. Calibrate M geometry](#8-calibrate-m-geometry)
-  - [8.1. Calibrate points](#81-calibrate-points)
-  - [8.2. Calibrate lines from distance](#82-calibrate-lines-from-distance)
-  - [8.3. Modify M geometry](#83-modify-m-geometry)
-  - [8.4. Calibrate lines from points (events)](#84-Calibrate-lines-from-points-events)
-
+- [8. Profile & Slope](#8-profile--slope)
+  - [8.1. Profile Slope Plotter](#81-profile-slope-plotter)
+  - [8.2. Slope and Longitudinal Profile](#82-slope-and-longitudinal-profile)
+  
 - [9. Licencia](#9-licencia)
 - [10. Autor](#10-autor)
 
@@ -175,467 +175,14 @@ Los algoritmos aparecen en la **Caja de herramientas de Processing** bajo los si
 
 ---
 
-# 4. Locate points (requires M geometry)
-
-### Parámetros comunes (puntos)
-
-Estos algoritmos comparten ideas y parámetros muy similares:
-
-- **Capa lineal calibrada (LineStringM/MultiLineStringM)**: red/eje con valores M.
-- **Campo ROUTE_ID en la capa lineal**.
-- **Unidades de M** (km o m).
-
-- **Tolerancia (km) para encaje por M (snap/rounding)**  
-  Útil para resolver pequeños desajustes **dentro de un tramo calibrado** (redondeos o calibración imperfecta).  
-  No “rellena” huecos: solo ayuda si el PK cae *muy cerca* de un valor existente/interpolable.
-
-- **Ajustar al PK disponible más cercano en caso de geometría incompleta (huecos)**  
-  Controla qué ocurre cuando el PK cae en un hueco entre tramos:
-  - **Activado**: aplica `GAP_SNAP`, el punto se genera y queda marcado en atributos (`ADJUSTED=1`, `ADJUST_REASON=GAP_SNAP`).
-  - **Desactivado**: el evento se marca como crítico `NO_MATCH` y no se crea el punto.
-
-- **Generar tabla de incidencias**  
-  Si está activada, genera una tabla cuando existan ajustes, avisos o errores críticos.
-
----
-
-### 4.1. Locate points
-
-**Qué hace**  
-Localiza puntos sobre una ruta calibrada a partir de pares `ROUTE_ID + PK` introducidos manualmente.
-
-**Entradas**
-- Capa lineal M.
-- Campo ROUTE_ID.
-- Uno o dos puntos a localizar segun su `ROUTE_ID`, `PK`).  
-  (Según configuración, puede incluir además un identificador `ID` para conservarlo en salida.)
-
-**Salidas**
-1. **Capa de puntos** con campos típicos:
-   - `ROUTE_ID`
-   - `PK_ID` (si se usa)
-   - `PK_REQ` (PK solicitado)
-   - `PK` (PK utilizado)
-   - `ADJUSTED` (0/1)
-   - `ADJUST_REASON` (p.ej. `OUT_OF_RANGE`, `GAP_SNAP`)
-   - `STATUS`
-
-2. **Tabla de incidencias** (opcional) con:
-   - `ROUTE_ID`, `PK_ID` (si aplica), `PK_REQ`
-   - `ADJUSTED`, `ADJUST_REASON`
-   - `WARNINGS`, `CRITICALS`
-
-> NOTA: Si hay ajuste, se marca `ADJUSTED=1` y queda reflejado en atributos.
-
----
-
-### 4.2. Locate points from table
-
-**Qué hace**  
-Localiza puntos usando una **tabla/capa de eventos** donde cada fila contiene un punto:
-- `ROUTE_ID`
-- `PK`
-- y opcionalmente un identificador de evento (`PK_ID`).
-
-**Entradas**
-- Capa lineal M + campo ROUTE_ID.
-- Tabla/capa de eventos:
-  - campo ROUTE_ID (en eventos)
-  - campo PK (en eventos)
-  - Opcional:
-    - añadir campos de la tabla a la salida
-    - definir `PK_ID`
-
-**Salida**
-- **Capa de puntos** con:
-  - `ROUTE_ID`
-  - `PK_ID` (si se proporciona)
-  - `PK_REQ`, `PK`, `ADJUSTED`, `ADJUST_REASON`, `STATUS`
-- **Tabla de incidencias** (opcional) con:
-   - `ROUTE_ID`, `PK_ID` (si aplica), `PK_REQ`
-   - `ADJUSTED`, `ADJUST_REASON`
-   - `WARNINGS`, `CRITICALS`
-
-> NOTA: Si hay ajuste, se marca `ADJUSTED=1` y queda reflejado en atributos.
-
-
----
-
-# 5. Locate segments (requires M geometry)
-
-Algoritmos para extraer **segmentos** definidos por PK inicio y PK fin sobre una capa lineal calibrada.
-
-### Parámetros comunes (segmentos)
-
-- **Capa lineal calibrada M** y campo ROUTE_ID.
-- **Unidades de M**.
-- **Tolerancia (km)** para encaje de extremos por M.
-- **Ajustar a PK disponible más cercano en huecos**.
-- **Generar tabla de incidencias**.
-- Opción de **generar puntos** en extremos del segmento (cuando el algoritmo lo permita).
-
-Campos típicos en segmentos:
-- `ROUTE_ID`
-- `SEG_ID` (si aplica)
-- `PK_INI`, `PK_FIN`
-- `DIST_PK_KM` (distancia “según PK”)
-- `DIST_GEOM_KM` (longitud geométrica real)
-- `ADJUSTED`, `ADJUST_REASON`
-- `N_PIECES` (número de piezas/fragmentos del segmento)
-- `STATUS`
-
-> Nota: `N_PIECES > 1` suele indicar que el segmento atraviesa discontinuidades o que la ruta está fragmentada; el tramo extraído puede ser multipart.
-
----
-
-## 5.1. Locate segments
-
-**Qué hace**  
-Extrae segmentos a partir de pares `ROUTE_ID + PK_INI + PK_FIN` introducidos manualmente.
-
-**Entradas**
-- Capa lineal M y ROUTE_ID.
-- Segmentos (ROUTE_ID, PK_INI, PK_FIN).
-- Opcional: identificador `SEG_ID`.
-
-**Salidas**
-1. **Capa de líneas** con los campos descritos arriba.
-2. **Capa de puntos** (opcional) con puntos en extremos:
-   - `ROUTE_ID`, `SEG_ID` (si aplica)
-   - `PK_REQ` (por extremo)
-   - `PK` (PK utilizado)
-   - `ADJUSTED`, `ADJUST_REASON`
-3. **Tabla de incidencias** (opcional) con:
-   - `ROUTE_ID`, `SEG_ID` (si aplica),
-   - `PK_INI_REQ`, `PK_FIN_REQ`,
-   - `ADJUSTED`, `ADJUST_REASON`
-   - `WARNINGS`, `CRITICALS`
-
----
-
-## 5.2. Locate segments from PK table
-
-**Qué hace**  
-Genera segmentos desde una tabla donde **cada fila aporta un PK y un identificador de emparejado**. Identifica los segmentos mediante la relación de pares de PKs con dicho identificador que ha de ser unico para cada segmento para un correcto funcionamiento del algoritmo.
-
-Para cada combinación `(ROUTE_ID, PAIR_ID)`:
-- los PK se ordenan numéricamente,
-- se emparejan secuencialmente (0–1, 2–3, …),
-- si queda un PK suelto, se ignora y se registra un aviso.
-
-**Entradas**
-- Capa lineal M + ROUTE_ID.
-- Tabla de PK:
-  - `ROUTE_ID`
-  - `PAIR_ID`
-  - `PK`
-- Opcional:
-  - añadir campos de la tabla a la salida
-  - generar puntos extremos
-  - tabla de incidencias
-
-**Salidas**
-- Capa de segmentos.
-- Puntos extremos (opcional).
-- Tabla de incidencias (opcional) con:
-   - `ROUTE_ID`, `SEG_ID` (si aplica),
-   - `PK_INI_REQ`, `PK_FIN_REQ`,
-   - `ADJUSTED`, `ADJUST_REASON`
-   - `WARNINGS`, `CRITICALS`
-
----
-
-## 5.3. Locate segments from segment table
-
-**Qué hace**  
-Extrae segmentos desde una **tabla de segmentos** (cada fila define un tramo con PK inicio/fin).
-
-**Entradas**
-- Capa lineal M y campo ROUTE_ID.
-- Tabla de segmentos con campos:
-  - route id (en tabla)
-  - PK inicio
-  - PK fin
-  - opcional: `EVENT_ID` permite transportar un campo de la tabla de origen.
-
-**Parámetros importantes**
-- Copiar campos de la tabla a la salida.
-- Generar puntos extremos.
-- Generar tabla de incidencias.
-
-**Salidas**
-- Segmentos (líneas), con ajuste y conteo de piezas (`N_PIECES`).
-- Puntos extremos (opcional).
-- Tabla de incidencias (opcional).
-
----
-
-# 6. Miscellaneous
-
-## 6.1. Extraer curvas y centroides
-
-**Qué hace**  
-Extrae segmentos de curva de una capa lineal, calcula radios de curvatura y, opcionalmente, agrupa centros cercanos (clusters). Genera hasta dos capas: **Curvas** y **Centroides**.
-
-#### Salidas
-
-**1) Capa Curvas (líneas)**  
-Cada entidad representa un segmento de curva con atributos:
-- `ID_Curva`: identificador único del segmento de curva
-- `ID_Centroide`: id del cluster asociado (o -1 si no aplica)
-- `Radio`: radio de curvatura (m)
-- `Longitud`: longitud del segmento (m)
-
-**2) Capa Centroides (opcional, puntos)**  
-Cada entidad representa un cluster de centros de curva:
-- `ID_Centroide`: id del cluster
-- `Radio_medio`: radio medio de las curvas del cluster (m)
-- `Conteo`: número de curvas en el cluster
-
-#### Parámetros
-
-- **Capa de líneas de entrada**: capa vectorial de líneas a analizar.
-- **Intervalo de densificación** (m): distancia entre vértices añadidos (por defecto 15.0).
-- **Radio mínimo** (m): descarta curvas más “cerradas” que este umbral (por defecto 2.0).
-- **Radio máximo** (m): descarta curvas demasiado “planas” (por defecto 50.0).
-- **Distancia mínima entre vértices** (m): ignora tríos de puntos demasiado cercanos (por defecto 0.5).
-- **Generar capa de centros de curva** (bool): si se activa, produce la capa de centroides/clusters (por defecto False).
-- **Distancia de agrupación de centros** (m): distancia máxima para agrupar centros en el mismo cluster (por defecto 10.0).
-
-#### Metodología
-
-1. **Densificación**: se densifica la línea para tener vértices a intervalos regulares.
-2. Para cada tripleta consecutiva `(p1, p2, p3)`:
-   - Se calculan longitudes `a=dist(p1,p2)`, `b=dist(p2,p3)`, `c=dist(p3,p1)`.
-   - Se calcula el semiperímetro `s=(a+b+c)/2`.
-   - Se calcula el área por Herón: `area = sqrt(s(s−a)(s−b)(s−c))`.
-   - Se calcula el radio del circuncírculo: `R = (a·b·c)/(4·area)`.
-   - Si los puntos son casi colineales (`area≈0`), no se calcula radio (se omite).
-3. (Opcional) Se calculan centros de curvatura y se **agrupan por distancia**.
-
-#### Limitaciones y recomendaciones
-
-- Usa un **CRS proyectado en metros** (UTM o similar). En geográficas (lat/long) las distancias serán incorrectas.
-- Si la geometría tiene ruido, puede producir curvas falsas.
-- El intervalo de densificación es clave:
-  - demasiado grande → perderás curvas
-  - demasiado pequeño → aumenta el coste y puede generar exceso de detecciones
-- Si la capa de centroides sale vacía:
-  - activa “Generar capa de centros de curva”
-  - asegúrate de que el rango de radios y filtros permite detectar curvas válidas
-
----
-
-# 7. Profile & Slope
-
-Este grupo reúne herramientas para generar perfiles longitudinales y pendientes a partir de un DEM, y para **graficar** dichos resultados de forma automática.
-
-## 7.1. Slope and Longitudinal Profile
-
-**Qué hace**  
-A partir de una línea (eje) y un DEM, genera:
-- un **perfil longitudinal** (distancia acumulada vs cota)
-- y una estimación de **pendientes** por tramos (en %)
-
-
-#### Entradas
-
-- **Capa de líneas de entrada**: Línea o conjunto de líneas que definen el eje a analizar.
-- **Modelo Digital del Terreno (DEM)**: Raster con valores de elevación (raster local o WCS).
-- **Campo identificador (opcional)**: Permite conservar un identificador del eje en las salidas.
-- **Paso de muestreo (m)**: Distancia entre puntos consecutivos donde se muestrea el DEM a lo largo de la línea.
-- **Invertir sentido del perfil** (opcional): Cambia el origen del perfil (inicio ↔ fin de la línea).
-
-
-#### Salidas
-
-1. **Tabla de perfil longitudinal (sin geometría)**: Se integra de modo sencillo con el algoritmo de L-RAT Profile Slope Plotter  
-   Una fila por muestra, con:
-   -`ID_Segmento`
-   - `Dist_Origen_metros`: distancia acumulada desde el origen,
-   - `Cota_RAW_metros`: cota muestreada
-   - `Cota_SUAV`: cota suavizada
-   - `SLOPE`: pendiente (en %),
-   - `SLOPE_TYPE`: tipo de valor de pendiente (`REAL`, `INTERP`, `EXTRAP`, `NODATA`)
-   
-   Opcionalmente, si se activa **Usar M** añade el valor del PK (opcional):
-   - `m_field_PK_KM`
-   - `m_field_PK_MMM` :contentReference[oaicite:3]{index=3}
-
-   Pensada para:
-   - análisis numérico,
-   - gráficos de perfil longitudinal,
-   - exportación a hojas de cálculo.
-
-1. **Capa de líneas segmentadas (micro-tramos)**  
-   La línea original se divide en segmentos entre muestras consecutivas, con atributos de cota y pendiente, pensados para:
-   - simbología por pendiente,
-   - identificación visual de tramos críticos.
-
-> Nota: esta capa **no conserva valores M**, ya que su objetivo es la representación y análisis del perfil.
-
-#### Paso de muestreo
-
-El **paso de muestreo** controla la resolución del perfil y del cálculo de pendientes:
-
-- Valores **pequeños**:
-  - mayor detalle,
-  - mayor sensibilidad al ruido del DEM,
-  - mayor coste computacional.
-- Valores **grandes**:
-  - perfiles más suaves,
-  - menor detalle,
-  - pueden ocultar cambios locales.
-
-**Recomendación práctica**: Como regla general, aplicar un paso como mínimo de 4x el tamaño del pixel del DEM.
-Si el paso es 0, se calcula automáticamente a partir de la resolución real del DEM, convertida a metros.
-
-#### Modos de muestreo del DEM (resampling)
-
-Controlan cómo se calcula la cota en cada punto muestreado sobre la línea:
-
-- **Nearest neighbour**: toma el valor del píxel más cercano. Método rápido que conserva los valores originales si bien puede ofrecer un resultado escalonado.
-- **Bilinear**: interpola usando 4 píxeles vecinos, ofreciendo un resultado suave y estable.
-- **Cubic**: interpola usando un vecindario mayor (más suave, más costoso; puede hacer fallback si no se puede calcular).
-
-#### Suavizado (métodos)
-
-Suaviza la serie de elevaciones para reducir ruido y estabilizar el cálculo de pendientes:
-
-- **Sin suavizado**
-- **Media móvil** (moving average)
-  Sustituye cada valor por el promedio de la ventana. Suaviza bastante el ruido, pero puede verse afectada por valores extremos (picos/artefactos).  
-  En igualdad de ventana, suele suavizar **más que Savitzky–Golay** y **de forma más “aplanadora”**.
-- **Mediana móvil** (moving median)
-  Sustituye cada valor por la mediana de la ventana. Es robusta frente a valores extremos, por lo que suele ser una buena opción cuando el DEM tiene artefactos locales (árboles, puentes...)
-- **Savitzky–Golay**
-  Suaviza preservando la forma mejor que la media movil, aunque puede introducir ruido ante una ventana pequeña y un orden elevado.
-
-**Ventana de suavizado**
-- Número de muestras usadas en el filtro.
-- Ventanas pequeñas suavizan poco; ventanas grandes suavizan más pero pueden “aplanar” cambios reales. Tipicamente, 7-15.
-
-**Orden polinómico (Savitzky–Golay)**
-- Grado del polinomio ajustado dentro de cada ventana.
-- Valores altos preservan mejor formas complejas, pero pueden amplificar ruido si la ventana es pequeña.
-
-#### Pendiente
-
-La pendiente se calcula entre muestras consecutivas como:
-
-- `slope% = 100 * dz / dx`
-
-Donde:
-
-- `dz` es la diferencia de cota,
-- `dx` es la distancia horizontal entre muestras.
-
-> NOTA: Cuando faltan valores de cota consecutivos, la pendiente se interpola o extrapola para mantener una capa de segmentos continua.
-
-#### Recomendaciones
-
-- DEM y línea deben estar en un CRS proyectado para obtener pendientes en % basadas en metros.
-- Ante un DEM ruidoso, se recomienda **mediana móvil** o **Savitzky–Golay**.
-
----
-
-## 7.2. Profile Slope Plotter
-
-**Qué hace**  
-Genera automáticamente gráficos en PNG y un informe HTML (index) a partir de una **tabla/dataset** con:
-- distancia desde el origen (m),
-- cota (perfil),
-- y opcionalmente pendiente (%).
-
-Está **pensado específicamente** para graficar la tabla creada por **“Slope and Longitudinal Profile”**, aunque puede usarse con cualquier tabla compatible.
-
-#### Entradas
-- **Tabla/capa de entrada**: dataset (puede ser sin geometría).
-- **Campo ID (opcional)**: genera un conjunto de gráficos por cada ID.
-- **Campo X**: distancia desde origen en metros (por defecto `Dist_Origen_metros`).
-- **Campo Y**: cota a graficar (por defecto `Cota_SUAV`).
-- **Campo pendiente** (opcional): pendiente en % (por defecto `SLOPE`).
-- **Usar PK** (opcional): si existe un campo PK (km), etiqueta el eje X como `K+MMM`.
-- **Carpeta de salida**: destino de PNG + `index.html`. :contentReference[oaicite:7]{index=7}
-
-#### Salidas
-- **PNG**: por cada ID genera:
-  - Perfil longitudinal
-  - Perfil + pendiente (%)
-- **HTML (index)**: informe con vista previa y enlaces a todos los gráficos. :contentReference[oaicite:8]{index=8}
-
-#### Consejos
-- Si tu tabla viene de “Slope and Longitudinal Profile”, usa por defecto:
-  - X = `Dist_Origen_metros`
-  - Y = `Cota_SUAV`
-  - Pendiente = `SLOPE`
-  - PK = `m_field_PK_KM` (si activaste “Usar M” en el cálculo)
-
----
-
-# 8. Calibrate M geometry
+# 4. Calibrate M geometry
 
 Este grupo reúne herramientas para **calibrar** o **derivar** valores relacionados con el PK/M con el objetivo de preparar datos (calibrar) para usarlos después en flujos de referenciación lineal.
 Se trata de algoritmos para añadir valores de calibración a geometrías existentes.
 
 ---
 
-## 8.1. Calibrate points
-
-**Qué hace**  
-Asigna a cada punto un **PK (km+mmm)** y un valor **M interpolado**, proyectando el punto sobre una capa lineal **calibrada** con geometría M (`LineStringM / MultiLineStringM`).  
-**No modifica** la geometría del punto: añade campos de calibración en atributos.
-
-#### Entradas
-
-- **Capa de puntos a calibrar**
-- **Capa de líneas calibrada (M)** (eje/viario)
-- **Unidades del campo M**: metros o kilómetros
-- **Distancia máxima (búsqueda/proyección)**: umbral para aceptar el emparejado (si el eje más cercano está más lejos, se marca incidencia)
-
-#### Opciones
-
-- **Restringir emparejado por ROUTE_ID** *(recomendado si hay vías paralelas)*  
-  Solo busca coincidencias dentro de la misma ruta/vía.  
-  Requiere indicar el campo `ROUTE_ID` tanto en **puntos** como en **líneas**.
-
-- **Añadir ROUTE_ID a la salida (desde la capa de líneas)**  
-  Copia el identificador de la línea emparejada al punto.  
-  Requiere indicar el campo `ROUTE_ID` en la **capa de líneas**.  
-  Si el campo `ROUTE_ID` ya existe en la capa de puntos, se crea como `ROUTE_ID_MATCH`.
-
-- **Generar tabla de incidencias (solo si existen)** *(avanzado, por defecto desactivado)*  
-  Si está activada, crea una tabla sin geometría **solo si** hubo incidencias.
-
-#### Salidas
-
-1) **Puntos calibrados (con PK/M)**  
-Copia los atributos originales y añade:
-
-- `PK`: PK formateado (`km+mmm`)
-- `M`: valor M interpolado (en las unidades almacenadas en la geometría)
-- `DIST_AXIS`: distancia del punto al eje emparejado (unidades del CRS)
-- `INCIDENCE`: `0/1` (1 si no se pudo calibrar)
-- `INC_TYPE`: motivo de la incidencia cuando `INCIDENCE=1`
-
-2) **Incidencias (tabla)** *(opcional)*  
-Por defecto desactivada. Si se activa y hay incidencias, genera una tabla con:
-- `PT_ID`, `ROUTE_ID`, `PK`, `M`, `DIST_AXIS`, `INC_TYPE`
-
-#### Incidencias (INC_TYPE)
-
-- `BAD_GEOMETRY`: geometría vacía/no válida/no puntual
-- `NO_ROUTE`: falta ROUTE_ID o no existe en la capa de líneas (si se restringe por ruta)
-- `NO_M_VALUES`: no se encuentran segmentos con valores M utilizables
-- `TOO_FAR`: existe proyección, pero supera la distancia máxima
-- `NO_MATCH`: no se pudo obtener una proyección válida con M
-
-#### Recomendación
-
-Para que `DIST_AXIS` esté en metros y el umbral “Distancia máxima” tenga sentido, usa un **CRS proyectado** (no geográfico).
-
-
-## 8.2. Calibrate lines from distance
+## 4.1. Calibrate lines from distance
 
 **Qué hace**  
 Calibra el valor **M** de una capa de líneas en función de la **distancia acumulada al origen**.
@@ -725,88 +272,10 @@ Los *warnings* y *criticals* se reportan explícitamente en el **log de Processi
 - Para capas complejas:
   - revisa visualmente el resultado,
   - considera calibrar por feature en lugar de por ROUTE_ID.
- 
----
-
- ## 8.3. Modify M geometry
-
-**Qué hace**  
-Modifica los valores **M** existentes en una capa `LineStringM / MultiLineStringM` mediante operaciones típicas de recalibración.  
-No cambia X/Y (ni Z); solo reescribe **M** en los vértices.
-
-Está pensado para:
-- corregir errores de calibración,
-- convertir unidades,
-- invertir el sentido kilométrico,
-- normalizar orígenes,
-- limpiar pequeños “rebotes” en el campo M.
-
-#### Entradas
-
-- **Capa de líneas con M** (`LineStringM / MultiLineStringM`)
-
-#### Operaciones
-
-El algoritmo aplica las operaciones en este orden general: **Factor/Offset → (opcional) Invertir → (opcional) Fijar origen → (opcional) Clamp → (opcional) Monotonía**.
-
-- **Offset**  
-  Desplaza todos los M una cantidad constante: `M' = M + offset`. 
-
-- **Factor**  
-  Escala todos los M: `M' = M * factor`.  
-  Útil para conversión de unidades o recalibración (ej.: km ↔ m).
-
-- **Invertir M (manteniendo rango)**  
-  Invierte el sentido de M sin cambiar el rango, usando: `M' = (Mmin + Mmax) − M`.  
-  El rango `Mmin/Mmax` se calcula por **feature** o por **ROUTE_ID** según el ámbito.
-
-- **Fijar origen (TARGET_START)**  
-  Aplica un desplazamiento uniforme para que el **primer vértice** tenga el M indicado, manteniendo el resto consistente.  
-  En ámbito por `ROUTE_ID`, el origen se calcula de forma común para todas las features de la ruta.
-
-- **Recortar (Clamp) al rango [min, max]**  
-  Limita M a un intervalo mínimo/máximo:  
-  - si `M < min` → `M = min`  
-  - si `M > max` → `M = max`  
-  Sirve para limpiar valores **fuera de rango** sin “remapear” la calibración (no comprime ni estira).  
-  Puede crear tramos **planos** al inicio o al final.
-
-- **Forzar monotonía (limpieza de “rebotes”)**  
-  Corrige inversiones locales de M para que evolucione siempre en el mismo sentido:  
-  - **creciente**: asegura `M[i] >= M[i-1]`  
-  - **decreciente**: asegura `M[i] <= M[i-1]`  
-  La **tolerancia (epsilon)** permite ignorar pequeñas variaciones numéricas antes de corregir.  
-  Esta opción puede “aplanar” pequeños tramos.
-
-#### Validación
-
-- **Requerir M** (avanzado)  
-  - Activado: las features sin M generan *critical* (`NO_M_VALUES`).  
-  - Desactivado: se omiten con *warning* (`SKIPPED_NO_M`).
-
-#### Ámbito (avanzado)
-
-- **Por feature** (recomendado)  
-  Aplica operaciones usando el rango/origen de cada feature.
-
-- **Por ROUTE_ID**  
-  Usa un rango/origen común para varias features (útil si una ruta está partida).  
-  Requiere indicar el campo **ROUTE_ID**.
-
-
-#### Salidas
-
-- **Capa de líneas con M modificado**.  
-- Se añade el campo `STATUS` (p.ej. `OK`, `SKIPPED_NO_M`, `NO_M_VALUES`, `BAD_GEOMETRY`, `NO_ROUTE`).  
-- El log de Processing incluye **warnings** y **criticals** (p.ej. `CLAMP_APPLIED`, `MONO_APPLIED`).
-
-#### Consejo
-
-Si usas **Invertir** o **Fijar origen** en rutas partidas, considera el ámbito **Por ROUTE_ID** para mantener coherencia global.
 
 ---
 
-## 8.4. Calibrate lines from points (events)
+## 4.2. Calibrate lines from points (events)
 
 Calibra el campo **M** de una capa de líneas a partir de **eventos puntuales** (PK) almacenados en una capa de puntos.  
 Cada punto se proyecta sobre la línea más cercana y se utiliza como **punto de control** para interpolar y asignar el valor M a lo largo del eje.
@@ -935,6 +404,537 @@ Se genera solo si se activa la opción y existen incidencias. Campos típicos:
 - En redes complejas, activa **Restringir por ROUTE_ID** y revisa la capa de **puntos proyectados**.
 - Si aparecen avisos `NON_MONOTONIC_PK`, revisa los PK de entrada antes de usar la calibración.
 
+---
+
+## 4.3. Calibrate points
+
+**Qué hace**  
+Asigna a cada punto un **PK (km+mmm)** y un valor **M interpolado**, proyectando el punto sobre una capa lineal **calibrada** con geometría M (`LineStringM / MultiLineStringM`).  
+**No modifica** la geometría del punto: añade campos de calibración en atributos.
+
+#### Entradas
+
+- **Capa de puntos a calibrar**
+- **Capa de líneas calibrada (M)** (eje/viario)
+- **Unidades del campo M**: metros o kilómetros
+- **Distancia máxima (búsqueda/proyección)**: umbral para aceptar el emparejado (si el eje más cercano está más lejos, se marca incidencia)
+
+#### Opciones
+
+- **Restringir emparejado por ROUTE_ID** *(recomendado si hay vías paralelas)*  
+  Solo busca coincidencias dentro de la misma ruta/vía.  
+  Requiere indicar el campo `ROUTE_ID` tanto en **puntos** como en **líneas**.
+
+- **Añadir ROUTE_ID a la salida (desde la capa de líneas)**  
+  Copia el identificador de la línea emparejada al punto.  
+  Requiere indicar el campo `ROUTE_ID` en la **capa de líneas**.  
+  Si el campo `ROUTE_ID` ya existe en la capa de puntos, se crea como `ROUTE_ID_MATCH`.
+
+- **Generar tabla de incidencias (solo si existen)** *(avanzado, por defecto desactivado)*  
+  Si está activada, crea una tabla sin geometría **solo si** hubo incidencias.
+
+#### Salidas
+
+1) **Puntos calibrados (con PK/M)**  
+Copia los atributos originales y añade:
+
+- `PK`: PK formateado (`km+mmm`)
+- `M`: valor M interpolado (en las unidades almacenadas en la geometría)
+- `DIST_AXIS`: distancia del punto al eje emparejado (unidades del CRS)
+- `INCIDENCE`: `0/1` (1 si no se pudo calibrar)
+- `INC_TYPE`: motivo de la incidencia cuando `INCIDENCE=1`
+
+2) **Incidencias (tabla)** *(opcional)*  
+Por defecto desactivada. Si se activa y hay incidencias, genera una tabla con:
+- `PT_ID`, `ROUTE_ID`, `PK`, `M`, `DIST_AXIS`, `INC_TYPE`
+
+#### Incidencias (INC_TYPE)
+
+- `BAD_GEOMETRY`: geometría vacía/no válida/no puntual
+- `NO_ROUTE`: falta ROUTE_ID o no existe en la capa de líneas (si se restringe por ruta)
+- `NO_M_VALUES`: no se encuentran segmentos con valores M utilizables
+- `TOO_FAR`: existe proyección, pero supera la distancia máxima
+- `NO_MATCH`: no se pudo obtener una proyección válida con M
+
+#### Recomendación
+
+Para que `DIST_AXIS` esté en metros y el umbral “Distancia máxima” tenga sentido, usa un **CRS proyectado** (no geográfico).
+ 
+---
+
+ ## 4.4. Modify M geometry
+
+**Qué hace**  
+Modifica los valores **M** existentes en una capa `LineStringM / MultiLineStringM` mediante operaciones típicas de recalibración.  
+No cambia X/Y (ni Z); solo reescribe **M** en los vértices.
+
+Está pensado para:
+- corregir errores de calibración,
+- convertir unidades,
+- invertir el sentido kilométrico,
+- normalizar orígenes,
+- limpiar pequeños “rebotes” en el campo M.
+
+#### Entradas
+
+- **Capa de líneas con M** (`LineStringM / MultiLineStringM`)
+
+#### Operaciones
+
+El algoritmo aplica las operaciones en este orden general: **Factor/Offset → (opcional) Invertir → (opcional) Fijar origen → (opcional) Clamp → (opcional) Monotonía**.
+
+- **Offset**  
+  Desplaza todos los M una cantidad constante: `M' = M + offset`. 
+
+- **Factor**  
+  Escala todos los M: `M' = M * factor`.  
+  Útil para conversión de unidades o recalibración (ej.: km ↔ m).
+
+- **Invertir M (manteniendo rango)**  
+  Invierte el sentido de M sin cambiar el rango, usando: `M' = (Mmin + Mmax) − M`.  
+  El rango `Mmin/Mmax` se calcula por **feature** o por **ROUTE_ID** según el ámbito.
+
+- **Fijar origen (TARGET_START)**  
+  Aplica un desplazamiento uniforme para que el **primer vértice** tenga el M indicado, manteniendo el resto consistente.  
+  En ámbito por `ROUTE_ID`, el origen se calcula de forma común para todas las features de la ruta.
+
+- **Recortar (Clamp) al rango [min, max]**  
+  Limita M a un intervalo mínimo/máximo:  
+  - si `M < min` → `M = min`  
+  - si `M > max` → `M = max`  
+  Sirve para limpiar valores **fuera de rango** sin “remapear” la calibración (no comprime ni estira).  
+  Puede crear tramos **planos** al inicio o al final.
+
+- **Forzar monotonía (limpieza de “rebotes”)**  
+  Corrige inversiones locales de M para que evolucione siempre en el mismo sentido:  
+  - **creciente**: asegura `M[i] >= M[i-1]`  
+  - **decreciente**: asegura `M[i] <= M[i-1]`  
+  La **tolerancia (epsilon)** permite ignorar pequeñas variaciones numéricas antes de corregir.  
+  Esta opción puede “aplanar” pequeños tramos.
+
+#### Validación
+
+- **Requerir M** (avanzado)  
+  - Activado: las features sin M generan *critical* (`NO_M_VALUES`).  
+  - Desactivado: se omiten con *warning* (`SKIPPED_NO_M`).
+
+#### Ámbito (avanzado)
+
+- **Por feature** (recomendado)  
+  Aplica operaciones usando el rango/origen de cada feature.
+
+- **Por ROUTE_ID**  
+  Usa un rango/origen común para varias features (útil si una ruta está partida).  
+  Requiere indicar el campo **ROUTE_ID**.
+
+
+#### Salidas
+
+- **Capa de líneas con M modificado**.  
+- Se añade el campo `STATUS` (p.ej. `OK`, `SKIPPED_NO_M`, `NO_M_VALUES`, `BAD_GEOMETRY`, `NO_ROUTE`).  
+- El log de Processing incluye **warnings** y **criticals** (p.ej. `CLAMP_APPLIED`, `MONO_APPLIED`).
+
+#### Consejo
+
+Si usas **Invertir** o **Fijar origen** en rutas partidas, considera el ámbito **Por ROUTE_ID** para mantener coherencia global.
+
+---
+
+# 5. Locate points (requires M geometry)
+
+### Parámetros comunes (puntos)
+
+Estos algoritmos comparten ideas y parámetros muy similares:
+
+- **Capa lineal calibrada (LineStringM/MultiLineStringM)**: red/eje con valores M.
+- **Campo ROUTE_ID en la capa lineal**.
+- **Unidades de M** (km o m).
+
+- **Tolerancia (km) para encaje por M (snap/rounding)**  
+  Útil para resolver pequeños desajustes **dentro de un tramo calibrado** (redondeos o calibración imperfecta).  
+  No “rellena” huecos: solo ayuda si el PK cae *muy cerca* de un valor existente/interpolable.
+
+- **Ajustar al PK disponible más cercano en caso de geometría incompleta (huecos)**  
+  Controla qué ocurre cuando el PK cae en un hueco entre tramos:
+  - **Activado**: aplica `GAP_SNAP`, el punto se genera y queda marcado en atributos (`ADJUSTED=1`, `ADJUST_REASON=GAP_SNAP`).
+  - **Desactivado**: el evento se marca como crítico `NO_MATCH` y no se crea el punto.
+
+- **Generar tabla de incidencias**  
+  Si está activada, genera una tabla cuando existan ajustes, avisos o errores críticos.
+
+---
+
+### 5.1. Locate points
+
+**Qué hace**  
+Localiza puntos sobre una ruta calibrada a partir de pares `ROUTE_ID + PK` introducidos manualmente.
+
+**Entradas**
+- Capa lineal M.
+- Campo ROUTE_ID.
+- Uno o dos puntos a localizar segun su `ROUTE_ID`, `PK`).  
+  (Según configuración, puede incluir además un identificador `ID` para conservarlo en salida.)
+
+**Salidas**
+1. **Capa de puntos** con campos típicos:
+   - `ROUTE_ID`
+   - `PK_ID` (si se usa)
+   - `PK_REQ` (PK solicitado)
+   - `PK` (PK utilizado)
+   - `ADJUSTED` (0/1)
+   - `ADJUST_REASON` (p.ej. `OUT_OF_RANGE`, `GAP_SNAP`)
+   - `STATUS`
+
+2. **Tabla de incidencias** (opcional) con:
+   - `ROUTE_ID`, `PK_ID` (si aplica), `PK_REQ`
+   - `ADJUSTED`, `ADJUST_REASON`
+   - `WARNINGS`, `CRITICALS`
+
+> NOTA: Si hay ajuste, se marca `ADJUSTED=1` y queda reflejado en atributos.
+
+---
+
+### 5.2. Locate points from table
+
+**Qué hace**  
+Localiza puntos usando una **tabla/capa de eventos** donde cada fila contiene un punto:
+- `ROUTE_ID`
+- `PK`
+- y opcionalmente un identificador de evento (`PK_ID`).
+
+**Entradas**
+- Capa lineal M + campo ROUTE_ID.
+- Tabla/capa de eventos:
+  - campo ROUTE_ID (en eventos)
+  - campo PK (en eventos)
+  - Opcional:
+    - añadir campos de la tabla a la salida
+    - definir `PK_ID`
+
+**Salida**
+- **Capa de puntos** con:
+  - `ROUTE_ID`
+  - `PK_ID` (si se proporciona)
+  - `PK_REQ`, `PK`, `ADJUSTED`, `ADJUST_REASON`, `STATUS`
+- **Tabla de incidencias** (opcional) con:
+   - `ROUTE_ID`, `PK_ID` (si aplica), `PK_REQ`
+   - `ADJUSTED`, `ADJUST_REASON`
+   - `WARNINGS`, `CRITICALS`
+
+> NOTA: Si hay ajuste, se marca `ADJUSTED=1` y queda reflejado en atributos.
+
+
+---
+
+# 6. Locate segments (requires M geometry)
+
+Algoritmos para extraer **segmentos** definidos por PK inicio y PK fin sobre una capa lineal calibrada.
+
+### Parámetros comunes (segmentos)
+
+- **Capa lineal calibrada M** y campo ROUTE_ID.
+- **Unidades de M**.
+- **Tolerancia (km)** para encaje de extremos por M.
+- **Ajustar a PK disponible más cercano en huecos**.
+- **Generar tabla de incidencias**.
+- Opción de **generar puntos** en extremos del segmento (cuando el algoritmo lo permita).
+
+Campos típicos en segmentos:
+- `ROUTE_ID`
+- `SEG_ID` (si aplica)
+- `PK_INI`, `PK_FIN`
+- `DIST_PK_KM` (distancia “según PK”)
+- `DIST_GEOM_KM` (longitud geométrica real)
+- `ADJUSTED`, `ADJUST_REASON`
+- `N_PIECES` (número de piezas/fragmentos del segmento)
+- `STATUS`
+
+> Nota: `N_PIECES > 1` suele indicar que el segmento atraviesa discontinuidades o que la ruta está fragmentada; el tramo extraído puede ser multipart.
+
+---
+
+## 6.1. Locate segments
+
+**Qué hace**  
+Extrae segmentos a partir de pares `ROUTE_ID + PK_INI + PK_FIN` introducidos manualmente.
+
+**Entradas**
+- Capa lineal M y ROUTE_ID.
+- Segmentos (ROUTE_ID, PK_INI, PK_FIN).
+- Opcional: identificador `SEG_ID`.
+
+**Salidas**
+1. **Capa de líneas** con los campos descritos arriba.
+2. **Capa de puntos** (opcional) con puntos en extremos:
+   - `ROUTE_ID`, `SEG_ID` (si aplica)
+   - `PK_REQ` (por extremo)
+   - `PK` (PK utilizado)
+   - `ADJUSTED`, `ADJUST_REASON`
+3. **Tabla de incidencias** (opcional) con:
+   - `ROUTE_ID`, `SEG_ID` (si aplica),
+   - `PK_INI_REQ`, `PK_FIN_REQ`,
+   - `ADJUSTED`, `ADJUST_REASON`
+   - `WARNINGS`, `CRITICALS`
+
+---
+
+## 6.2. Locate segments from PK table
+
+**Qué hace**  
+Genera segmentos desde una tabla donde **cada fila aporta un PK y un identificador de emparejado**. Identifica los segmentos mediante la relación de pares de PKs con dicho identificador que ha de ser unico para cada segmento para un correcto funcionamiento del algoritmo.
+
+Para cada combinación `(ROUTE_ID, PAIR_ID)`:
+- los PK se ordenan numéricamente,
+- se emparejan secuencialmente (0–1, 2–3, …),
+- si queda un PK suelto, se ignora y se registra un aviso.
+
+**Entradas**
+- Capa lineal M + ROUTE_ID.
+- Tabla de PK:
+  - `ROUTE_ID`
+  - `PAIR_ID`
+  - `PK`
+- Opcional:
+  - añadir campos de la tabla a la salida
+  - generar puntos extremos
+  - tabla de incidencias
+
+**Salidas**
+- Capa de segmentos.
+- Puntos extremos (opcional).
+- Tabla de incidencias (opcional) con:
+   - `ROUTE_ID`, `SEG_ID` (si aplica),
+   - `PK_INI_REQ`, `PK_FIN_REQ`,
+   - `ADJUSTED`, `ADJUST_REASON`
+   - `WARNINGS`, `CRITICALS`
+
+---
+
+## 6.3. Locate segments from segment table
+
+**Qué hace**  
+Extrae segmentos desde una **tabla de segmentos** (cada fila define un tramo con PK inicio/fin).
+
+**Entradas**
+- Capa lineal M y campo ROUTE_ID.
+- Tabla de segmentos con campos:
+  - route id (en tabla)
+  - PK inicio
+  - PK fin
+  - opcional: `EVENT_ID` permite transportar un campo de la tabla de origen.
+
+**Parámetros importantes**
+- Copiar campos de la tabla a la salida.
+- Generar puntos extremos.
+- Generar tabla de incidencias.
+
+**Salidas**
+- Segmentos (líneas), con ajuste y conteo de piezas (`N_PIECES`).
+- Puntos extremos (opcional).
+- Tabla de incidencias (opcional).
+
+---
+
+# 7. Miscellaneous
+
+## 7.1. Curve Detection and Curvature Centers
+
+**Qué hace**  
+Extrae segmentos de curva de una capa lineal, calcula radios de curvatura y, opcionalmente, agrupa centros cercanos (clusters). Genera hasta dos capas: **Curvas** y **Centroides**.
+
+#### Salidas
+
+**1) Capa Curvas (líneas)**  
+Cada entidad representa un segmento de curva con atributos:
+- `ID_Curva`: identificador único del segmento de curva
+- `ID_Centroide`: id del cluster asociado (o -1 si no aplica)
+- `Radio`: radio de curvatura (m)
+- `Longitud`: longitud del segmento (m)
+
+**2) Capa Centroides (opcional, puntos)**  
+Cada entidad representa un cluster de centros de curva:
+- `ID_Centroide`: id del cluster
+- `Radio_medio`: radio medio de las curvas del cluster (m)
+- `Conteo`: número de curvas en el cluster
+
+#### Parámetros
+
+- **Capa de líneas de entrada**: capa vectorial de líneas a analizar.
+- **Intervalo de densificación** (m): distancia entre vértices añadidos (por defecto 15.0).
+- **Radio mínimo** (m): descarta curvas más “cerradas” que este umbral (por defecto 2.0).
+- **Radio máximo** (m): descarta curvas demasiado “planas” (por defecto 50.0).
+- **Distancia mínima entre vértices** (m): ignora tríos de puntos demasiado cercanos (por defecto 0.5).
+- **Generar capa de centros de curva** (bool): si se activa, produce la capa de centroides/clusters (por defecto False).
+- **Distancia de agrupación de centros** (m): distancia máxima para agrupar centros en el mismo cluster (por defecto 10.0).
+
+#### Metodología
+
+1. **Densificación**: se densifica la línea para tener vértices a intervalos regulares.
+2. Para cada tripleta consecutiva `(p1, p2, p3)`:
+   - Se calculan longitudes `a=dist(p1,p2)`, `b=dist(p2,p3)`, `c=dist(p3,p1)`.
+   - Se calcula el semiperímetro `s=(a+b+c)/2`.
+   - Se calcula el área por Herón: `area = sqrt(s(s−a)(s−b)(s−c))`.
+   - Se calcula el radio del circuncírculo: `R = (a·b·c)/(4·area)`.
+   - Si los puntos son casi colineales (`area≈0`), no se calcula radio (se omite).
+3. (Opcional) Se calculan centros de curvatura y se **agrupan por distancia**.
+
+#### Limitaciones y recomendaciones
+
+- Usa un **CRS proyectado en metros** (UTM o similar). En geográficas (lat/long) las distancias serán incorrectas.
+- Si la geometría tiene ruido, puede producir curvas falsas.
+- El intervalo de densificación es clave:
+  - demasiado grande → perderás curvas
+  - demasiado pequeño → aumenta el coste y puede generar exceso de detecciones
+- Si la capa de centroides sale vacía:
+  - activa “Generar capa de centros de curva”
+  - asegúrate de que el rango de radios y filtros permite detectar curvas válidas
+
+---
+
+# 8. Profile & Slope
+
+Este grupo reúne herramientas para generar perfiles longitudinales y pendientes a partir de un DEM, y para **graficar** dichos resultados de forma automática.
+
+## 8.1. Profile Slope Plotter
+
+**Qué hace**  
+Genera automáticamente gráficos en PNG y un informe HTML (index) a partir de una **tabla/dataset** con:
+- distancia desde el origen (m),
+- cota (perfil),
+- y opcionalmente pendiente (%).
+
+Está **pensado específicamente** para graficar la tabla creada por **“Slope and Longitudinal Profile”**, aunque puede usarse con cualquier tabla compatible.
+
+#### Entradas
+- **Tabla/capa de entrada**: dataset (puede ser sin geometría).
+- **Campo ID (opcional)**: genera un conjunto de gráficos por cada ID.
+- **Campo X**: distancia desde origen en metros (por defecto `Dist_Origen_metros`).
+- **Campo Y**: cota a graficar (por defecto `Cota_SUAV`).
+- **Campo pendiente** (opcional): pendiente en % (por defecto `SLOPE`).
+- **Usar PK** (opcional): si existe un campo PK (km), etiqueta el eje X como `K+MMM`.
+- **Carpeta de salida**: destino de PNG + `index.html`. :contentReference[oaicite:7]{index=7}
+
+#### Salidas
+- **PNG**: por cada ID genera:
+  - Perfil longitudinal
+  - Perfil + pendiente (%)
+- **HTML (index)**: informe con vista previa y enlaces a todos los gráficos. :contentReference[oaicite:8]{index=8}
+
+#### Consejos
+- Si tu tabla viene de “Slope and Longitudinal Profile”, usa por defecto:
+  - X = `Dist_Origen_metros`
+  - Y = `Cota_SUAV`
+  - Pendiente = `SLOPE`
+  - PK = `m_field_PK_KM` (si activaste “Usar M” en el cálculo)
+
+---
+
+## 8.2. Slope and Longitudinal Profile
+
+**Qué hace**  
+A partir de una línea (eje) y un DEM, genera:
+- un **perfil longitudinal** (distancia acumulada vs cota)
+- y una estimación de **pendientes** por tramos (en %)
+
+
+#### Entradas
+
+- **Capa de líneas de entrada**: Línea o conjunto de líneas que definen el eje a analizar.
+- **Modelo Digital del Terreno (DEM)**: Raster con valores de elevación (raster local o WCS).
+- **Campo identificador (opcional)**: Permite conservar un identificador del eje en las salidas.
+- **Paso de muestreo (m)**: Distancia entre puntos consecutivos donde se muestrea el DEM a lo largo de la línea.
+- **Invertir sentido del perfil** (opcional): Cambia el origen del perfil (inicio ↔ fin de la línea).
+
+
+#### Salidas
+
+1. **Tabla de perfil longitudinal (sin geometría)**: Se integra de modo sencillo con el algoritmo de L-RAT Profile Slope Plotter  
+   Una fila por muestra, con:
+   -`ID_Segmento`
+   - `Dist_Origen_metros`: distancia acumulada desde el origen,
+   - `Cota_RAW_metros`: cota muestreada
+   - `Cota_SUAV`: cota suavizada
+   - `SLOPE`: pendiente (en %),
+   - `SLOPE_TYPE`: tipo de valor de pendiente (`REAL`, `INTERP`, `EXTRAP`, `NODATA`)
+   
+   Opcionalmente, si se activa **Usar M** añade el valor del PK (opcional):
+   - `m_field_PK_KM`
+   - `m_field_PK_MMM` :contentReference[oaicite:3]{index=3}
+
+   Pensada para:
+   - análisis numérico,
+   - gráficos de perfil longitudinal,
+   - exportación a hojas de cálculo.
+
+1. **Capa de líneas segmentadas (micro-tramos)**  
+   La línea original se divide en segmentos entre muestras consecutivas, con atributos de cota y pendiente, pensados para:
+   - simbología por pendiente,
+   - identificación visual de tramos críticos.
+
+> Nota: esta capa **no conserva valores M**, ya que su objetivo es la representación y análisis del perfil.
+
+#### Paso de muestreo
+
+El **paso de muestreo** controla la resolución del perfil y del cálculo de pendientes:
+
+- Valores **pequeños**:
+  - mayor detalle,
+  - mayor sensibilidad al ruido del DEM,
+  - mayor coste computacional.
+- Valores **grandes**:
+  - perfiles más suaves,
+  - menor detalle,
+  - pueden ocultar cambios locales.
+
+**Recomendación práctica**: Como regla general, aplicar un paso como mínimo de 4x el tamaño del pixel del DEM.
+Si el paso es 0, se calcula automáticamente a partir de la resolución real del DEM, convertida a metros.
+
+#### Modos de muestreo del DEM (resampling)
+
+Controlan cómo se calcula la cota en cada punto muestreado sobre la línea:
+
+- **Nearest neighbour**: toma el valor del píxel más cercano. Método rápido que conserva los valores originales si bien puede ofrecer un resultado escalonado.
+- **Bilinear**: interpola usando 4 píxeles vecinos, ofreciendo un resultado suave y estable.
+- **Cubic**: interpola usando un vecindario mayor (más suave, más costoso; puede hacer fallback si no se puede calcular).
+
+#### Suavizado (métodos)
+
+Suaviza la serie de elevaciones para reducir ruido y estabilizar el cálculo de pendientes:
+
+- **Sin suavizado**
+- **Media móvil** (moving average)
+  Sustituye cada valor por el promedio de la ventana. Suaviza bastante el ruido, pero puede verse afectada por valores extremos (picos/artefactos).  
+  En igualdad de ventana, suele suavizar **más que Savitzky–Golay** y **de forma más “aplanadora”**.
+- **Mediana móvil** (moving median)
+  Sustituye cada valor por la mediana de la ventana. Es robusta frente a valores extremos, por lo que suele ser una buena opción cuando el DEM tiene artefactos locales (árboles, puentes...)
+- **Savitzky–Golay**
+  Suaviza preservando la forma mejor que la media movil, aunque puede introducir ruido ante una ventana pequeña y un orden elevado.
+
+**Ventana de suavizado**
+- Número de muestras usadas en el filtro.
+- Ventanas pequeñas suavizan poco; ventanas grandes suavizan más pero pueden “aplanar” cambios reales. Tipicamente, 7-15.
+
+**Orden polinómico (Savitzky–Golay)**
+- Grado del polinomio ajustado dentro de cada ventana.
+- Valores altos preservan mejor formas complejas, pero pueden amplificar ruido si la ventana es pequeña.
+
+#### Pendiente
+
+La pendiente se calcula entre muestras consecutivas como:
+
+- `slope% = 100 * dz / dx`
+
+Donde:
+
+- `dz` es la diferencia de cota,
+- `dx` es la distancia horizontal entre muestras.
+
+> NOTA: Cuando faltan valores de cota consecutivos, la pendiente se interpola o extrapola para mantener una capa de segmentos continua.
+
+#### Recomendaciones
+
+- DEM y línea deben estar en un CRS proyectado para obtener pendientes en % basadas en metros.
+- Ante un DEM ruidoso, se recomienda **mediana móvil** o **Savitzky–Golay**.
 
 ---
 
