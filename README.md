@@ -32,25 +32,23 @@ Repositorio: https://github.com/Javisionario/L-RAT
   - [4.4. Calibrate points](#44-calibrate-points)
   - [4.5. Modify M geometry](#45-modify-m-geometry)
 
-- [5. Locate points (requieres M geometry)](#5-locate-points-requieres-m-geometry)
+- [5. Locate points (requires M geometry)](#5-locate-points-requires-m-geometry)
   - [5.1. Incidencias y trazabilidad](#51-incidencias-y-trazabilidad)
-  - [5.2. Discontinuidades de calibración y fuera de rango](#52-discontinuidades-de-calibración-y-fuera-de-rango)
-  - [5.3. Locate points from table](#53-locate-points-from-table)
-  - [5.4. Otros algoritmos del subgrupo](#54-otros-algoritmos-del-subgrupo)
+  - [5.2. Ajustes por fuera de rango y por discontinuidades de cobertura (M)](#52-ajustes-por-fuera-de-rango-y-por-discontinuidades-de-cobertura-m)
+  - [5.3. Locate points](#53-locate-points)
+  - [5.4. Locate points from table](#54-locate-points-from-table)
 
-- [6. Locate segments (requieres M geometry)](#6-locate-segments-requieres-m-geometry)
+- [6. Locate segments (requires M geometry)](#6-locate-segments-requires-m-geometry)
   - [6.1. Incidencias y trazabilidad](#61-incidencias-y-trazabilidad)
-  - [6.2. Discontinuidades de calibración y fuera de rango](#62-discontinuidades-de-calibración-y-fuera-de-rango)
+  - [6.2. Ajustes por fuera de rango y por discontinuidades de cobertura (M)](#62-ajustes-por-fuera-de-rango-y-por-discontinuidades-de-cobertura-m)
   - [6.3. Locate segments](#63-locate-segments)
   - [6.4. Locate segments from PK table](#64-locate-segments-from-pk-table)
   - [6.5. Locate segments from segment table](#65-locate-segments-from-segment-table)
 
-- [7. Miscellaneous](#7-miscellaneous)
-  - [7.1. Curve Detection and Curvature Centers](#71-curve-detection-and-curvature-centers)
-
 - [8. Profile & Slope](#8-profile--slope)
-  - [8.1. Profile Slope Plotter](#81-profile-slope-plotter)
-  - [8.2. Slope and Longitudinal Profile](#82-slope-and-longitudinal-profile)
+  - [8.1. Incidencias y trazabilidad](#81-incidencias-y-trazabilidad)
+  - [8.2. Profile Slope Plotter](#82-profile-slope-plotter)
+  - [8.3. Slope and Longitudinal Profile](#83-slope-and-longitudinal-profile)
 
 - [9. Licencia](#9-licencia)
 - [10. Autor](#10-autor)
@@ -80,7 +78,7 @@ Las capas `LineStringM / MultiLineStringM` almacenan, además de X/Y (y opcional
 - **Extraer** tramos entre PK inicio y PK fin.
 - **Calibrar** puntos por proximidad a una red con M.
 
-**L-RAT** es una herramienta que permite realizar estas funcionas
+**L-RAT** es una herramienta que permite realizar estas funciones.
 
 ---
 
@@ -113,7 +111,7 @@ L-RAT intenta ser flexible con la entrada de PK y acepta formatos habituales:
 
 ---
 
-## 1.6 Gestion de Incidencias
+## 1.6 Gestion de incidencias
 
 L-RAT puede registrar incidencias para auditar ajustes, avisos y errores:
 - en **campos de salida** (p.ej. `ADJUSTED`, `ADJUST_REASON`, `STATUS`),
@@ -412,10 +410,10 @@ Los algoritmos de este subgrupo localizan (interpolan) puntos sobre una red/eje 
 
 **Opciones avanzadas (comunes):**
 - **Tolerancia (km)**: corrige pequeños desajustes dentro de tramo calibrado (redondeos o calibración imperfecta). **No corrige discontinuidades de cobertura**: solo ayuda si el PK cae muy cerca de un valor existente/interpolable.
-- **Ajustar al PK disponible más cercano en caso de geometría incompleta**: Controla qué ocurre cuando el PK cae en una **discontinuidad** (por geometría o cobertura de M):
+- **Ajustar al PK disponible más cercano**: controla qué ocurre cuando el PK cae en una **discontinuidad** (por geometría incompleta  o cobertura de M):
   - Activado → el punto puede generarse ajustando el PK al valor **cubierto** más cercano (`ADJUST_REASON=GAP_SNAP`).
   - Desactivado → el evento pasa a **crítico** (`NO_MATCH`) y no se crea el punto.
-- **Generar tabla de incidencias (ajustes/criticos)**  
+- **Generar tabla de incidencias (ajustes/críticos)**  
   Si está activada, genera la tabla **solo si** existen filas reales de incidencias (ajustes o críticos).
 
 ---
@@ -565,7 +563,7 @@ Los algoritmos de este subgrupo extraen **segmentos** (líneas) definidos por `R
 
 **Opciones avanzadas (comunes):**
 - **Tolerancia (km) para encaje por M (snap/rounding)**: ayuda a resolver pequeños desajustes dentro de un tramo calibrado (**no corrige discontinuidades de cobertura**).
-- **Ajustar al PK disponible más cercano en caso de geometría incompleta**: comportamiento si un extremo cae en una discontinuidad o geometría incompleta
+- **Ajustar al PK disponible más cercano**: controla qué ocurre cuando el PK cae en una **discontinuidad** (por geometría incompleta  o cobertura de M):
   - Activado → el extremo puede ajustarse al PK más cercano (`ADJUST_REASON=GAP_SNAP`).
   - Desactivado → el evento pasa a **crítico** (`NO_MATCH`) y no se genera geometría.
 - **Generar tabla de incidencias si hubiera (ajustes/warnings/críticos)**: si está activada,registra incidencias por evento/grupo en caso de que las haya (según algoritmo).
@@ -690,7 +688,7 @@ Incluye `WARNINGS` y `CRITICALS` (ver [6.1](#61-incidencias-y-trazabilidad)).
 
 ## 6.4. Locate segments from PK table
 
-Genera segmentos desde una tabla donde **cada fila aporta un PK**, asociado a `ROUTE_ID` y `PAIR_ID`. Identifica los segmentos mediante la relación de pares de PKs con dicho identificador que idealmente ha de ser unico para cada segmento para un correcto funcionamiento del algoritmo.
+Genera segmentos desde una tabla donde **cada fila aporta un PK**, asociado a `ROUTE_ID` y `PAIR_ID`. Identifica los segmentos mediante la relación de pares de PKs con dicho identificador que idealmente ha de ser único para cada segmento para un correcto funcionamiento del algoritmo.
 
 #### Cómo funciona (emparejado)
 Para cada `(ROUTE_ID, PAIR_ID)`:
@@ -701,7 +699,7 @@ Para cada `(ROUTE_ID, PAIR_ID)`:
 ### Entradas
 - **Capa de líneas calibrada (M)** y su campo `ROUTE_ID`.
 - **Tabla de PKs (cada fila = 1 PK)**.
-  - `Campo ROUTE_ID en la tabla`: Permite identificar la via en donde esta el segmento
+  - `Campo ROUTE_ID en la tabla`: Permite identificar la vía en donde esta el segmento
   - `Campo PAIR_ID (segmento/evento) en la tabla`: Identificador de puntos que definen cada segmento.
   - `Campo PK en la tabla`
 - **Unidades del campo M**
@@ -735,7 +733,7 @@ Extrae segmentos desde una tabla de segmentos donde **cada fila define un tramo*
 ### Entradas
 - **Capa de líneas calibrada (M)** y su campo `ROUTE_ID`.
 - **Tabla de segmentos (cada fila = 1 segmento)** con:
-  - `Campo ROUTE_ID en la tabla`: Permite identificar la via en donde esta el segmento
+  - `Campo ROUTE_ID en la tabla`: Permite identificar la vía en donde esta el segmento
   - `Campo PK inicio`
   - `Campo PK fin`
   - `Campo ID de evento/segmento` *(opcional)*
