@@ -863,7 +863,7 @@ En este subgrupo la trazabilidad se apoya en:
 - **Campos de calidad en las salidas** (`SLOPE_TYPE` en la tabla y en la capa segmentada). 
 - **Warnings en el log de Processing** (por ejemplo, campos opcionales inexistentes) y **errores** cuando no es posible producir resultados (p. ej. no hay datos válidos para graficar). 
 
-### `SLOPE_TYPE` (calidad de la pendiente)
+#### `SLOPE_TYPE` (calidad de la pendiente)
 Tanto en la **tabla** como en la **capa segmentada**, el campo `SLOPE_TYPE` indica el origen/calidad del valor de pendiente: 
 - `REAL`: pendiente calculada con datos de cota válidos en ambos extremos del tramo.
 - `INTERP`: pendiente rellenada por **interpolación** entre tramos vecinos con pendiente real.
