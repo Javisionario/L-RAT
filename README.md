@@ -14,12 +14,12 @@ Repositorio: https://github.com/Javisionario/L-RAT
 # Índice
 
 - [1. Requisitos y conceptos](#1-requisitos-y-conceptos)
-  - [1.1. Geometrías soportadas y CRS recomendado](#11-geometrías-soportadas-y-crs-recomendado)
+  - [1.1. Tipos de datos y geometrías soportadas](#11-tipos-de-datos-y-geometrías-soportadas)
   - [1.2. Qué es una geometría M](#12-qué-es-una-geometría-m)
   - [1.3. Unidades del campo M](#13-unidades-del-campo-m)
-  - [1.4. ROUTE_ID (identificador de vía/ruta)](#14-route_id-identificador-de-víaruta)
+  - [1.4. Campo ROUTE_ID (Identificador de vía o ruta)](#14-campo-route_id-identificador-de-vía-o-ruta)
   - [1.5. Formatos de PK aceptados](#15-formatos-de-pk-aceptados)
-  - [1.6. Gestión de incidencias](#16-gestión-de-incidencias)
+  - [1.6. Gestión de incidencias](#16-gestion-de-incidencias)
 
 - [2. Instalación](#2-instalación)
 - [3. Estructura del plugin](#3-estructura-del-plugin)
@@ -90,7 +90,7 @@ Una configuración incorrecta produce resultados erróneos (p. ej., puntos despl
 
 ---
 
-## 1.4. Campo ROUTE_ID
+## 1.4. Campo ROUTE_ID (Identificador de vía o ruta)
 
 Muchos algoritmos trabajan por **ruta/vía** usando un identificador (típicamente `ROUTE_ID`):
 - Una capa lineal (eje/viario) con `ROUTE_ID`.
@@ -103,7 +103,7 @@ En redes densas o con vías paralelas, **restringir por ROUTE_ID** suele ser imp
 
 ---
 
-## 1.5. Formato del PK
+## 1.5. Formatos de PK aceptados
 
 L-RAT intenta ser flexible con la entrada de PK y acepta formatos habituales:
 - `km+mmm` (ej.: `12+345`)
@@ -768,6 +768,8 @@ Incluye `WARNINGS` (p.ej. `SEGMENT_SPLIT`) y `CRITICALS` (ver [6.1](#61-incidenc
 ## 7.1. Curve Detection and Curvature Centers
 
 Detecta **segmentos locales de curvatura** en una capa lineal, estima su **radio de curvatura** y opcionalmente, calcula **centros de curvatura** (circuncentros) y los agrupa por proximidad para generar una capa de centros agrupados.
+
+![CURVAS](IMAGES/CURVAS.png)
 
 > NOTA : la capa de “curvas” no contiene tramos agregados/continuos; cada entidad corresponde a una detección local basada en una tripleta consecutiva `p1–p2–p3` (pueden solaparse entre sí).
 
