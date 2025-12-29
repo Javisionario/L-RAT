@@ -45,6 +45,9 @@ Repositorio: https://github.com/Javisionario/L-RAT
   - [6.4. Locate segments from PK table](#64-locate-segments-from-pk-table)
   - [6.5. Locate segments from segment table](#65-locate-segments-from-segment-table)
 
+- [7. Miscellaneous](#7-miscellaneous)
+  - [7.1. Curve Detection and Curvature Centers](#71-curve-detection-and-curvature-centers)
+
 - [8. Profile & Slope](#8-profile--slope)
   - [8.1. Incidencias y trazabilidad](#81-incidencias-y-trazabilidad)
   - [8.2. Profile Slope Plotter](#82-profile-slope-plotter)
@@ -141,12 +144,15 @@ Los algoritmos aparecen en la **Caja de herramientas de Processing** bajo los si
 - **Locate segments (requires M geometry)**
 - **Miscellaneous**
 - **Profile & Slope**
+
 ![MENU](IMAGES/MENU.png)
+
 ---
 
 # 4. Calibrate M geometry
 
 Los algoritmos de este subgrupo constituyen una serie de herramientas para **calibrar** valores PK/M con el objetivo de preparar datos para flujos de referenciación lineal. Se trata de algoritmos para añadir o editar valores de calibración a geometrías existentes.
+![CALIBRATE](IMAGES/CALIBRATE.PNG)
 
 ---
 
@@ -401,6 +407,8 @@ El algoritmo aplica las operaciones en el siguiente orden general:
 # 5. Locate points (requires M geometry)
 
 Los algoritmos de este subgrupo localizan (interpolan) puntos sobre una red/eje **calibrado con geometría M** con valores válidos(`LineStringM / MultiLineStringM`) a partir de `ROUTE_ID + PK`.
+![LOCATE](IMAGES/LOCATE.PNG)
+
 
 ### Parámetros comunes
 
@@ -554,6 +562,7 @@ Localiza puntos usando una tabla/capa de eventos: cada fila define un punto medi
 # 6. Locate segments (requires M geometry)
 
 Los algoritmos de este subgrupo extraen **segmentos** (líneas) definidos por `ROUTE_ID + PK_INI + PK_FIN` sobre una red/eje **calibrado con geometría M** con valores válidos (`LineStringM / MultiLineStringM`).
+![EXTRACT](IMAGES/EXTRACT.PNG)
 
 ### Parámetros comunes
 
@@ -768,7 +777,7 @@ Incluye `WARNINGS` (p.ej. `SEGMENT_SPLIT`) y `CRITICALS` (ver [6.1](#61-incidenc
 
 Detecta **segmentos locales de curvatura** en una capa lineal, estima su **radio de curvatura** y opcionalmente, calcula **centros de curvatura** (circuncentros) y los agrupa por proximidad para generar una capa de centros agrupados.
 
-![CURVAS](IMAGES/CURVAS.png)
+![CURVAS](IMAGES/RADIUS.png)
 
 > NOTA : la capa de “curvas” no contiene tramos agregados/continuos; cada entidad corresponde a una detección local basada en una tripleta consecutiva `p1–p2–p3` (pueden solaparse entre sí).
 
@@ -806,6 +815,8 @@ Cada entidad representa un cluster de centros:
 - `ID_Centroide` (int): identificador del cluster.
 - `Radio_medio` (double): radio medio de las curvas asignadas al cluster.
 - `Conteo` (int): número de curvas en el cluster.
+
+![CURVAS](IMAGES/EX_CURVAS.png)
 
 ### Metodología (resumen técnico)
 
@@ -852,6 +863,7 @@ Para cada tripleta consecutiva `(p1, p2, p3)`:
 # 8. Profile & Slope
 
 Este subgrupo reúne dos algoritmos para **calcular perfiles longitudinales y pendientes (%)** a partir de un **DEM** (raster local o WCS) y, posteriormente, **graficar** esos resultados de forma automática.
+![PROFILE](IMAGES/PROFILE.PNG)
 
 ---
 
@@ -872,7 +884,7 @@ Tanto en la **tabla** como en la **capa segmentada**, el campo `SLOPE_TYPE` indi
 ---
 
 ## 8.2. Profile Slope Plotter
-![BANNER](IMAGES/PROFILE.png)
+
 Genera gráficos **PNG** y un informe **HTML (index)** a partir de una tabla/dataset con:
 - distancia desde el origen (**metros**),
 - cota (perfil),
@@ -900,6 +912,9 @@ Está diseñado para graficar la tabla generada por **Slope and Longitudinal Pro
   - `perfil_<ID>.png`
   - `perfil_pendiente_<ID>.png`
 - **Informe HTML (index)** con vista previa y enlaces.
+
+![BANNER](IMAGES/EX_PROFILE.png)
+
 
 ---
 
