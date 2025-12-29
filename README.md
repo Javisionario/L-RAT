@@ -998,7 +998,8 @@ Campos:
 
 ## 9. Licencia
 
-GNU GPL v3.0 (GPL-3.0)
+Este proyecto se distribuye bajo la GNU General Public License v3.0 (GPL-3.0).
+Puedes usarlo, modificarlo y compartirlo libremente bajo los términos de esta licencia.
 
 ---
 
