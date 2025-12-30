@@ -1,5 +1,4 @@
 ![BANNER](IMAGES/BANNER.png)
-
 ## L-RAT (Linear Referencing & Analysis Tools) — QGIS Processing Plugin
 [En español](README.md)
 
@@ -32,7 +31,7 @@ Repository: https://github.com/Javisionario/L-RAT
   - [4.2. Calibrate lines from distance](#42-calibrate-lines-from-distance)
   - [4.3. Calibrate lines from points (events)](#43-calibrate-lines-from-points-events)
   - [4.4. Calibrate points](#44-calibrate-points)
-  - [4.5. Modify M geometry](#45-modify-m-geometry)
+  - [4.5. Edit calibration (Modify M values)](#45-edit-calibration-Modify-M-values)
 
 - [5. Locate points (requires M geometry)](#5-locate-points-requires-m-geometry)
   - [5.1. Issues and traceability](#51-issues-and-traceability)
@@ -365,7 +364,7 @@ Fields: `PT_ID`, `ROUTE_ID`, `PK`, `M`, `DIST_AXIS`, `INC_TYPE`
 
 ---
 
-## 4.5. Modify M geometry
+## Edit calibration (Modify M values)
 
 Modifies existing **M** values in a `LineStringM / MultiLineStringM` layer using common recalibration operations.  
 It does not change `X`/`Y` (or `Z`); it only rewrites **M**.
