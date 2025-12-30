@@ -364,7 +364,7 @@ Fields: `PT_ID`, `ROUTE_ID`, `PK`, `M`, `DIST_AXIS`, `INC_TYPE`
 
 ---
 
-## Edit calibration (Modify M values)
+## 4.5. Edit calibration (Modify M values)
 
 Modifies existing **M** values in a `LineStringM / MultiLineStringM` layer using common recalibration operations.  
 It does not change `X`/`Y` (or `Z`); it only rewrites **M**.
