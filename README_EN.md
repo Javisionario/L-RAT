@@ -1,6 +1,7 @@
 ![BANNER](IMAGES/BANNER.png)
 
 ## L-RAT (Linear Referencing & Analysis Tools) — QGIS Processing Plugin
+[En español](README.md)
 
 L-RAT is a **QGIS Processing plugin** focused on **road engineering and linear-infrastructure workflows**. It includes tools for:
 
