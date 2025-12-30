@@ -903,10 +903,14 @@ Está diseñado para graficar la tabla generada por **Slope and Longitudinal Pro
 - **Campo pendiente (%)** *(opcional; por defecto `SLOPE`)*: Si el campo no existe, se registra warning y la pendiente se considera `NaN`.
 - **Usar PK (si existe)** *(bool)*: Cambia el **etiquetado** del eje X a PK (`K+MMM`) usando el campo PK (km). Si se activa pero el campo no existe, se registra warning y se desactiva el modo PK.
 - **Campo PK (km, ej. 91.740)** *(opcional; por defecto `m_field_PK_KM`)*
+- **Mostrar etiquetas de ejes** (*bool*): Activado: muestra títulos y nombres de ejes. Desactivado: no se muestra letreros, lo que favorece el uso del gráfico en otros idiomas.
 
 ### Cómo funciona el eje X (distancia vs PK)
 - El perfil **siempre se representa contra la distancia real** (`X_FIELD`, en metros).
 - Si se activa **Usar PK**, el algoritmo **usa PK para construir las marcas/etiquetas del eje X**:
+
+### Cómo funciona el eje Y (cota)
+- El eje de cota no comienza necesariamente en 0, ajusta automáticamente sus límites al rango a representar.
 
 ### Salidas
 - **Carpeta** con PNG por cada ID:
