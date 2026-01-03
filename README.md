@@ -207,7 +207,7 @@ Calibra el valor **M** de una capa de líneas en función de la **distancia acum
   - `M_END` (double)
   - `LEN_M` (double) — longitud en unidades M (según configuración)
   - `STATUS` (string)
-  - `N_SEGS` (integer) — número de segmentos del feature (Recomendado revisar la continuidad de la calibración (valores M) en los casos `N_SEGS >1` en capas MultiLineString)
+  - `N_SEGS` (integer) — número de segmentos del feature original (Recomendado revisar la continuidad de la calibración (valores M) en los casos `N_SEGS >1` en capas MultiLineString)
 
 ### Códigos de incidencias
 `STATUS` puede tomar los siguientes valores:
@@ -274,6 +274,7 @@ Cada punto se proyecta sobre la línea más cercana (o sobre la ruta correspondi
    - `LEN_ERR_P` (double) — error porcentual respecto a `LEN_GEOM` si existe `M_LEN` y `LEN_GEOM>0`
    - `HAS_NULLM` (int) — 1 si algún vértice quedó con M = `NaN` (modo “Dejar NULL” fuera de rango)
    - `STATUS` (string)
+   - `N_SEGS` (integer) — número de segmentos del feature original (Recomendado revisar la continuidad de la calibración (valores M) en los casos `N_SEGS >1` en capas MultiLineString)
 
 > Nota: `LEN_GEOM` y, por tanto, `LEN_ERR_M`/`LEN_ERR_P` solo son interpretables en un CRS proyectado (metros). En CRS geográfico (grados) pueden ser valores no comparables.
 
