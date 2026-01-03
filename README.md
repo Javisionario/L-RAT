@@ -189,10 +189,8 @@ Calibra el valor **M** de una capa de líneas en función de la **distancia acum
 
 ### Entradas
 - **Capa de líneas a calibrar** (con o sin M).
-- (Avanzado) **Campo ROUTE_ID en la capa de líneas**: solo necesario si se activa “Agrupar por ruta”.
 
 ### Parámetros
-- **Agrupar por ROUTE_ID (calibrar por ruta)**: si está desactivado, se calibra **por feature**.
 - **Unidades del campo M (salida)**: `Meters (m)` / `Kilometers (km)`.
 - **Start M**: valor inicial de M (en las unidades de salida).
 - **Invertir sentido**: M decrece en el sentido geométrico.
@@ -209,6 +207,7 @@ Calibra el valor **M** de una capa de líneas en función de la **distancia acum
   - `M_END` (double)
   - `LEN_M` (double) — longitud en unidades M (según configuración)
   - `STATUS` (string)
+  - `N_SEGS` (integer) — número de segmentos del feature (Recomendado revisar la continuidad de la calibración (valores M) en los casos `N_SEGS >1` en capas MultiLineString)
 
 ### Códigos de incidencias
 `STATUS` puede tomar los siguientes valores:
