@@ -191,10 +191,8 @@ Calibrates the **M** value of a line layer based on **cumulative distance from a
 
 ### Inputs
 - **Line layer to calibrate** (with or without M).
-- (Advanced) **ROUTE_ID field in the line layer**: only required if “Group by route” is enabled.
 
 ### Parameters
-- **Group by ROUTE_ID (calibrate by route)**: if disabled, calibration is **per feature**.
 - **M units (output)**: `Meters (m)` / `Kilometers (km)`.
 - **Start M**: initial M value (in output units).
 - **Reverse direction**: M decreases along the geometry direction.
@@ -211,6 +209,7 @@ Calibrates the **M** value of a line layer based on **cumulative distance from a
   - `M_END` (double)
   - `LEN_M` (double) — length in M units (per configuration)
   - `STATUS` (string)
+  - `N_SEGS` (integer) — number of segments/parts in the feature. Recommended to verify calibration continuity (M values) when `N_SEGS > 1` (MultiLineString geometries).
 
 ### Issue codes
 `STATUS` can take the following values:
