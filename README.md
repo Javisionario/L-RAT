@@ -914,6 +914,7 @@ Está diseñado para graficar la tabla generada por **Slope and Longitudinal Pro
 - El eje de cota no comienza necesariamente en 0, ajusta automáticamente sus límites al rango a representar.
 
 ### Salidas
+Check `Processing Toolbox` → `Results Viewer`
 - **Carpeta** con PNG por cada ID:
   - `perfil_<ID>.png`
   - `perfil_pendiente_<ID>.png`
