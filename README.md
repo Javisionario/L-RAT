@@ -217,7 +217,6 @@ Calibra el valor **M** de una capa de líneas en función de la **distancia acum
 - `SKIPPED_HAS_M`: no se recalibra porque ya tenía M y **Sobrescribir M existente** está desactivado.
 - `BAD_GEOMETRY`: geometría vacía/no válida/no lineal.
 - `ZERO_LENGTH`: longitud 0 (warning).
-- `NO_ROUTE`: se pidió agrupar por ruta y no hay `ROUTE_ID` válido para ese feature.
 - `NO_REFERENCE_GEOM`: no se pudo construir/obtener una geometría de referencia válida para esa ruta (solo en modo por ruta).
 
 <p><b>Nota:</b> Si la geometría de entrada es multipart (MultiLineString), cada parte se procesa por separado y la salida contendrá un feature por parte.</p>
@@ -246,9 +245,7 @@ Cada punto se proyecta sobre la línea más cercana (o sobre la ruta correspondi
   Tolerancia usada al construir la referencia por `ROUTE_ID` (cuando se agrupa por ruta).
 
 ### Opciones
-- **Agrupar por ROUTE_ID**: Calibra rutas partidas con referencia común por ruta, manteniendo features.
-- **Restringir emparejado por ROUTE_ID** *(recomendado en redes densas o vías paralelas)*: Fuerza que cada punto solo pueda calibrar la línea con el mismo identificador de ruta.  
-  Requiere `ROUTE_ID` en **puntos** y **líneas**.
+- **Agrupar por ROUTE_ID**: (Requiere indicar el campo `ROUTE_ID` en puntos y líneas). Fuerza que los PK solo calibren su vía correspondiente. Además, el algoritmo detecta automáticamente forks y ejes paralelos y genera `warnings` si pueden afectar a la calibración.
 - **Añadir ROUTE_ID a la salida (desde puntos)**: Si la salida ya tiene un campo `ROUTE_ID`, se crea `ROUTE_ID_FROM_PTS` para no sobreescribirlo.
 - **Ajustar comportamiento fuera del rango de puntos (extrapolación)**:
   - `Extrapolar linealmente`: prolonga linealmente usando la pendiente de los controles extremos.
