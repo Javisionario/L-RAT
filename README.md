@@ -56,6 +56,7 @@ Repositorio: https://github.com/Javisionario/L-RAT
 
 - [9. Licencia](#9-licencia)
 - [10. Autor](#10-autor)
+
 ---
 
 # 1. Requisitos y conceptos
@@ -102,6 +103,7 @@ Muchos algoritmos trabajan por **ruta/vía** usando un identificador (típicamen
 Si una vía está dividida en varios features, L-RAT puede:
 - trabajar **por feature**, o
 - **agrupar por ROUTE_ID** (cuando exista la opción), manteniendo coherencia global.
+
 En redes densas o con vías paralelas, **restringir por ROUTE_ID** suele ser imprescindible para evitar emparejados erróneos.
 
 ---
@@ -133,7 +135,6 @@ L-RAT puede registrar incidencias para auditar ajustes, avisos y errores:
   1. Descarga el ZIP del repositorio.
   2. **QGIS → Plugins → Administrar e instalar plugins** → Instalar desde ZIP → Busca la carpeta descargada.
 
-
 ---
 
 # 3. Estructura del plugin
@@ -153,6 +154,7 @@ Los algoritmos aparecen en la **Caja de herramientas de Processing** bajo los si
 # 4. Calibrate M geometry
 
 Los algoritmos de este subgrupo constituyen una serie de herramientas para **calibrar** valores PK/M con el objetivo de preparar datos para flujos de referenciación lineal. Se trata de algoritmos para añadir o editar valores de calibración a geometrías existentes.
+
 ![CALIBRATE](IMAGES/CALIBRATE.PNG)
 
 ---
@@ -218,7 +220,7 @@ Calibra el valor **M** de una capa de líneas en función de la **distancia acum
 - `NO_ROUTE`: se pidió agrupar por ruta y no hay `ROUTE_ID` válido para ese feature.
 - `NO_REFERENCE_GEOM`: no se pudo construir/obtener una geometría de referencia válida para esa ruta (solo en modo por ruta).
 
-> NOTA: al agrupar por ruta, en ejes paralelos próximos o geometrías complejas, la lógica “por cercanía” puede dar asignaciones no deseadas (Por ejemplo, en el caso de varios features con el mismo ROUTE_ID a la misma distancia). Revisa resultados.
+<p><b>Nota:</b> Si la geometría de entrada es multipart (MultiLineString), cada parte se procesa por separado y la salida contendrá un feature por parte.</p>
 
 ---
 
