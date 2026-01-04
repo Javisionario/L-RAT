@@ -209,7 +209,7 @@ Calibrates the **M** value of a line layer based on **cumulative distance from a
   - `M_END` (double)
   - `LEN_M` (double) — length in M units (per configuration)
   - `STATUS` (string)
-  - `N_SEGS` (integer) — number of segments/parts in the feature. Recommended to verify calibration continuity (M values) when `N_SEGS > 1` (MultiLineString geometries).
+  - `N_SEGS` (integer) — number of segments/parts in the original feature. Recommended to verify calibration continuity (M values) when `N_SEGS > 1` (MultiLineString geometries).
 
 ### Issue codes
 `STATUS` can take the following values:
@@ -220,7 +220,7 @@ Calibrates the **M** value of a line layer based on **cumulative distance from a
 - `NO_ROUTE`: grouping by route requested but no valid `ROUTE_ID` for that feature.
 - `NO_REFERENCE_GEOM`: failed to build/get a valid reference geometry for that route (route mode only).
 
-> NOTE: When grouping by route, in close parallel axes or complex geometries, “by proximity” logic can produce unintended assignments (e.g., multiple features with the same ROUTE_ID at the same distance). Review results.
+<p><b>Note:</b> If the input geometry is multipart (MultiLineString), each part is processed separately and the output will contain one feature per part.</p>
 
 ---
 
@@ -276,6 +276,7 @@ Each point is projected onto the nearest line (or onto the corresponding route i
    - `LEN_ERR_P` (double) — percent error vs `LEN_GEOM` if `M_LEN` exists and `LEN_GEOM>0`
    - `HAS_NULLM` (int) — 1 if any vertex ended with M = `NaN` (when “Leave NULL” outside range)
    - `STATUS` (string)
+  - `N_SEGS` (integer) — number of segments/parts in the original feature. Recommended to verify calibration continuity (M values) when `N_SEGS > 1` (MultiLineString geometries).
 
 > Note: `LEN_GEOM` (and therefore `LEN_ERR_M`/`LEN_ERR_P`) is meaningful only in a projected CRS (meters). In a geographic CRS (degrees) these values are not comparable.
 
