@@ -892,6 +892,8 @@ Genera gráficos **PNG** y un informe **HTML (index)** a partir de una tabla/dat
 
 Está diseñado para graficar la tabla generada por **Slope and Longitudinal Profile**, aunque puede usarse con cualquier tabla compatible.
 
+![PROFILE_REPORT](IMAGES/PROFILE_REPORT.png)
+
 ### Entradas
 - **Tabla/capa de entrada (puede ser sin geometría)**.
 
@@ -917,7 +919,7 @@ Está diseñado para graficar la tabla generada por **Slope and Longitudinal Pro
   - `perfil_pendiente_<ID>.png`
 - **Informe HTML (index)** con vista previa y enlaces.
 
-![BANNER](IMAGES/EX_PROFILE.png)
+![PROFILE](IMAGES/EX_PROFILE.png)
 
 
 ---
