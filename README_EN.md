@@ -29,9 +29,9 @@ Repository: https://github.com/Javisionario/L-RAT
 - [4. Calibrate M geometry](#4-calibrate-m-geometry)
   - [4.1. Issues and traceability](#41-issues-and-traceability)
   - [4.2. Calibrate lines from distance](#42-calibrate-lines-from-distance)
-  - [4.3. Calibrate lines from points (events)](#43-calibrate-lines-from-points-events)
+  - [4.3. Calibrate lines from points/events](#43-calibrate-lines-from-pointsevents)
   - [4.4. Calibrate points](#44-calibrate-points)
-  - [4.5. Edit calibration (Modify M values)](#45-edit-calibration-Modify-M-values)
+  - [4.5. Edit calibration (Modify M values)](#45-edit-calibration-modify-m-values)
 
 - [5. Locate points (requires M geometry)](#5-locate-points-requires-m-geometry)
   - [5.1. Issues and traceability](#51-issues-and-traceability)
@@ -194,7 +194,7 @@ Calibrates the **M** value of a line layer based on **cumulative distance from a
 
 ### Parameters
 - **M units (output)**: `Meters (m)` / `Kilometers (km)`.
-- **Start M**: initial M value (in output units).
+- **Start M value**: initial M value (in output units).
 - **Reverse direction**: M decreases along the geometry direction.
 - **Overwrite existing M**: if disabled and geometry already has M, it is skipped and flagged in `STATUS`.
 - (Advanced) **Length mode**: `Auto`, `Planar`, `Geodesic` (use a local projected CRS).
@@ -223,15 +223,15 @@ Calibrates the **M** value of a line layer based on **cumulative distance from a
 
 ---
 
-## 4.3. Calibrate lines from points (events)
+## 4.3. Calibrate lines from points/events
 
-Calibrates the **M** field of a line layer from **point events** (PK) stored in a point layer.  
-Each point is projected onto the nearest line (or onto the corresponding route if restricted by `ROUTE_ID`) and used as a **control point** to interpolate and assign M along the axis. The result is a `LineStringM / MultiLineStringM` layer calibrated according to the provided PKs.
+Calibrates the **M** field of a line layer with chainage (PK) stored in a **points/events layer**.  
+Each point is projected onto the nearest line (or onto the corresponding route if restricted by `ROUTE_ID`) and used as a **control point** to interpolate and assign M along the axis. The result is a `LineStringM / MultiLineStringM` layer calibrated with M values according to the provided chainage (PK).
 
 ### Inputs
 - **Line layer** (with or without M): linear layer to calibrate (with or without existing M values).
-- **Point layer (events)**: points with known PK values.
-- **PK field in the point layer**: field containing the PK value.
+- **Reference point layer**: events with known chainage (PK) values.
+- **Chainage (PK) field**: field containing those values.
 
 ### Parameters
 - **Input PK units (point field)**:
@@ -247,7 +247,7 @@ Each point is projected onto the nearest line (or onto the corresponding route i
 ### Options
 - **Group by ROUTE_ID**: (Requires specifying the `ROUTE_ID` field in both points and lines). Forces each point to calibrate only the line with the same route identifier. Also, the algorithm automatically detects forks and parallel centerlines and generates `warnings` if they may affect calibration.
 - **Add ROUTE_ID to output (from points)**: if output already has `ROUTE_ID`, creates `ROUTE_ID_FROM_PTS` to avoid overwriting.
-- **Out-of-range behavior (extrapolation)**:
+- **Behavior outside control range**:
   - `Linear extrapolation`: extends linearly using the slope from the extreme controls.
   - `Clamp`: fixes M to the nearest extreme control value (flat/constant outside range).
   - `Leave NULL (NaN)`: leaves M unassigned outside the range (NULL/NaN), useful to identify uncalibrated parts.
