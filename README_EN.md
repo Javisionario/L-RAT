@@ -4,9 +4,9 @@
 
 L-RAT is a **QGIS Processing plugin** focused on **road engineering and linear-infrastructure workflows**. It includes tools for:
 
-- **Calibration (PK/M)**: add/derive PK/M in geometries (compute point PK by proximity; generate/adjust M values on lines).
-- **Linear referencing (PK/M)**: locate **points** and extract **segments** along calibrated lines (`LineStringM / MultiLineStringM`).
-- **Profiles & slopes**: compute longitudinal profile and slopes from an axis and a DEM, and generate plots/outputs for mapping.
+- **Calibration (Chainage/PK)**: add/derive chainage values (PK) in geometries (compute chainage point by proximity; generate/adjust M values on lines).
+- **Linear referencing (Chainage/PK)**: locate and extract **points** and **segments** along calibrated lines (`LineStringM / MultiLineStringM`).
+- **Profiles & slopes**: compute longitudinal profile and slopes from an axis and a DEM, and generate plots/outputs for mapping (no chainage/PK needed).
 - **Misc**: geometric analysis on linear layers (e.g., curve detection and curvature centers).
 
 Repository: https://github.com/Javisionario/L-RAT
@@ -43,7 +43,7 @@ Repository: https://github.com/Javisionario/L-RAT
   - [6.1. Issues and traceability](#61-issues-and-traceability)
   - [6.2. Out-of-range and M-coverage discontinuity adjustments](#62-out-of-range-and-m-coverage-discontinuity-adjustments)
   - [6.3. Locate segments](#63-locate-segments)
-  - [6.4. Locate segments from PK table](#64-locate-segments-from-pk-table)
+  - [6.4. Locate segments from points/events (PK) table](#64-locate-segments-from-pointsevents-pk-table)
   - [6.5. Locate segments from segment table](#65-locate-segments-from-segment-table)
 
 - [7. Miscellaneous](#7-miscellaneous)
@@ -79,8 +79,8 @@ Repository: https://github.com/Javisionario/L-RAT
 ## 1.2. What is an M geometry?
 
 `LineStringM / MultiLineStringM` layers store, in addition to X/Y (and optionally Z), an **M** value per vertex. In road contexts, M is commonly used as kilometer point / chainage (PK), enabling you to:
-- **Interpolate** a position along a line from a PK.
-- **Extract** segments between a start PK and an end PK.
+- **Interpolate** a position along a line from a chainage value (PK).
+- **Extract** segments between a chainage start and end.
 - **Calibrate** points by proximity to an M-enabled network.
 
 **L-RAT** provides tools to perform these workflows.
@@ -153,7 +153,7 @@ Algorithms appear in the **Processing Toolbox** under these subgroups:
 
 # 4. Calibrate M geometry
 
-This subgroup provides tools to **calibrate** PK/M values to prepare data for linear-referencing workflows. These algorithms add or edit calibration values on existing geometries.
+This subgroup provides tools to **calibrate**  chainage (PK) values to prepare data for linear-referencing workflows. These algorithms add or edit calibration values on existing geometries.
 
 ![CALIBRATE](IMAGES/CALIBRATE.PNG)
 
@@ -234,12 +234,12 @@ Each point is projected onto the nearest line (or onto the corresponding route i
 - **Chainage (PK) field**: field containing those values.
 
 ### Parameters
-- **Input PK units (point field)**:
+- **Input chainage (PK) units (point field)**:
   - `Auto ('PK+mmm' text or infer units: m / km)`
   - `Meters (m)`
   - `Kilometers (km)`
 - **M units (output)**: `Meters (m)` / `Kilometers (km)`
-- **Max distance (search / projection)**  
+- **Maximum distance (search / projection)**  
   Maximum threshold to accept point–line matching. If the closest match is farther than this, the point is flagged as an issue (`TOO_FAR`) and does not contribute to calibration.
 - **Endpoint snap tolerance (to build route reference)**  
   Tolerance used while building the `ROUTE_ID` reference (when grouping by route).
@@ -323,7 +323,7 @@ Each point is projected onto the nearest line (or onto the corresponding route i
 
 ## 4.4. Calibrate points
 
-Assigns a **PK (km+mmm)** to each point from the **interpolated M** value, by projecting the point onto a calibrated line layer (`LineStringM / MultiLineStringM`). It does not change point geometry: it adds calibration fields to attributes.
+Assigns a **chainage** value (PK) to each point from the **interpolated M** value, by projecting the point onto a calibrated line layer (`LineStringM / MultiLineStringM`). It does not change point geometry: it adds calibration fields to attributes.
 
 ### Inputs
 - **Point layer to calibrate**
@@ -331,7 +331,7 @@ Assigns a **PK (km+mmm)** to each point from the **interpolated M** value, by pr
 
 ### Parameters
 - **M units**: m or km
-- **Max distance (search/projection)**: threshold to accept matching (if the nearest axis is farther, an issue is flagged)
+- **Maximum distance (search/projection)**: threshold to accept matching (if the nearest axis is farther, an issue is flagged)
 
 ### Options
 - **Restrict matching by ROUTE_ID** (requires `ROUTE_ID` in points and lines)  
@@ -343,7 +343,7 @@ Assigns a **PK (km+mmm)** to each point from the **interpolated M** value, by pr
 ### Outputs
 1) **Calibrated points** (original attributes +)
 - *(Optional if enabled)* `ROUTE_ID` **or** `ROUTE_ID_MATCH` (string)
-- `PK` (string) — PK formatted as `km+mmm`
+- `PK` (string) — chainage formatted as `km+mmm`
 - `M` (double)
 - `DIST_AXIS` (double)
 - `INCIDENCE` (int) — 0/1
@@ -406,7 +406,7 @@ Operations are applied in this general order:
 
 # 5. Locate points (requires M geometry)
 
-This subgroup locates (interpolates) points along an **M-calibrated** network/axis with valid M values (`LineStringM / MultiLineStringM`) from `ROUTE_ID + PK`.
+This subgroup locates (interpolates) points along an **M-calibrated** network/axis with valid M values (`LineStringM / MultiLineStringM`) from `ROUTE_ID` + `chainage/PK`.
 
 ![LOCATE](IMAGES/LOCATE.PNG)
 
@@ -417,9 +417,9 @@ This subgroup locates (interpolates) points along an **M-calibrated** network/ax
 - **M units** (km or m)
 
 **Common advanced options:**
-- **Tolerance (km)**: fixes small mismatches within calibrated coverage (rounding or imperfect calibration). **Does not fix coverage discontinuities**; it only helps when the PK falls very close to an existing/interpolable value.
-- **Adjust to nearest available PK**: controls what happens when the PK falls into an **M-coverage discontinuity** (due to incomplete geometry or M gaps):
-  - Enabled → the point can be created by snapping to the nearest **covered** PK (`ADJUST_REASON=GAP_SNAP`).
+- **Tolerance (km)**: fixes small mismatches within calibrated coverage (rounding or imperfect calibration). **Does not fix coverage discontinuities**; it only helps when chainage (PK) falls very close to an existing/interpolable value.
+- **Adjust to nearest available chainage point (PK)**: controls what happens when the chainage (PK) falls into an **M-coverage discontinuity** (due to incomplete geometry or M gaps):
+  - Enabled → the point can be created by snapping to the nearest **covered** chainage (PK) (`ADJUST_REASON=GAP_SNAP`).
   - Disabled → the event becomes **critical** (`NO_MATCH`) and the point is not created.
 - **Generate issues table (adjustments/critical)**  
   If enabled, the table is created **only if** there are actual issue rows (adjustments or critical events).
@@ -433,8 +433,8 @@ Traceability in this subgroup is based on:
 - An optional **Issues (table)** with fields: `ADJUSTED`, `ADJUST_REASON`, `WARNINGS`, `CRITICALS`.
 
 ### Point output (control fields)
-- `PK_REQ`: requested PK (formatted `km+mmm`).
-- `PK`: final PK used (may be adjusted).
+- `PK_REQ`: requested chainage (PK) (formatted `km+mmm`).
+- `PK`: final chainage (PK) used (may be adjusted).
 - `ADJUSTED`: `0/1`.
 - `ADJUST_REASON`: reasons separated by `;` (e.g., `OUT_OF_RANGE;GAP_SNAP`).
 - `STATUS`: for generated points, the algorithm writes `OK`.
@@ -447,9 +447,9 @@ Traceability in this subgroup is based on:
 
 ### Adjustment codes (`ADJUST_REASON`)
 - `OUT_OF_RANGE`  
-  Requested PK is outside the route’s global `[M_min, M_max]` range and is clamped to the nearest endpoint.
+  Requested chainage (PK) is outside the route’s global `[M_min, M_max]` range and is clamped to the nearest endpoint.
 - `GAP_SNAP`  
-  Requested PK falls inside the global range but in an **M-coverage discontinuity**; if adjustment is enabled, it snaps to the nearest **covered** PK.
+  Requested chainage (PK) falls inside the global range but in an **M-coverage discontinuity**; if adjustment is enabled, it snaps to the nearest **covered** PK.
 
 ### Critical error codes (`CRITICALS`)
 - `NO_ROUTE`: `ROUTE_ID` does not exist in the line layer or could not be indexed.
@@ -457,60 +457,62 @@ Traceability in this subgroup is based on:
 - `NO_MATCH`: failed to interpolate the point (includes discontinuity with snap disabled).
 
 > Note about `PK_INVALID`:
-> - In **Locate points from table**, `PK_INVALID` can appear as a critical **per row** (PK not parseable).
-> - In **Locate points (manual)**, an invalid PK input triggers a **validation error** and the algorithm stops (it is not reported as a per-event critical).
+> - In **Locate points from table**, `PK_INVALID` can appear as a critical **per row** (chainage (PK) not parseable).
+> - In **Locate points (manual)**, an invalid chainage (PK) input triggers a **validation error** and the algorithm stops (it is not reported as a per-event critical).
 
 ---
 
 ## 5.2. Out-of-range and M-coverage discontinuity adjustments
 
-In segmented networks (multiple features per `ROUTE_ID`, or non-continuous M calibration), **discontinuities** may exist—areas not covered for certain PK values, due to split geometries or M coverage gaps.
+In segmented networks (multiple features per `ROUTE_ID`, or non-continuous M calibration), **discontinuities** may exist—areas not covered for certain chainage (PK) values, due to split geometries or M coverage gaps.
 
 L-RAT distinguishes two situations:
 
 ### 1) Global out of range (`OUT_OF_RANGE`)
-Requested PK is outside the route’s global available range (`M_min–M_max`, considering all geometries for the `ROUTE_ID`).  
-The algorithm clamps PK to the nearest endpoint and marks:
+Requested chainage (PK) is outside the route’s global available range (`M_min–M_max`, considering all geometries for the `ROUTE_ID`).  
+The algorithm clamps chainage (PK) to the nearest endpoint and marks:
 - `ADJUSTED=1`
 - `ADJUST_REASON` includes `OUT_OF_RANGE`
 
 ### 2) M-coverage discontinuity (`GAP_SNAP`)
-PK is within the global range, but **no segment** of that route covers it (not interpolable in any available `LineStringM`).  
-If **Adjust to nearest available PK…** is enabled, the algorithm:
-- finds the nearest **covered** PK,
+Requested chainage (PK) is within the global range, but **no segment** of that route covers it (not interpolable in any available `LineStringM`).  
+If **Adjust to nearest available chainage (PK)…** is enabled, the algorithm:
+- finds the nearest **covered** chainage (PK),
 - adjusts to it,
 - marks `ADJUST_REASON` with `GAP_SNAP`.
 
-If the option is disabled and PK falls in a discontinuity:
+If the option is disabled and requested chainage values (PK) falls in a discontinuity:
 - the event is marked as a **critical** `NO_MATCH` and **no point** is created.
 
-> A single event may accumulate both reasons. For example, an out-of-range PK is clamped to an endpoint (`OUT_OF_RANGE`) and if that endpoint is not covered by any segment, `GAP_SNAP` may also apply.
+> A single event may accumulate both reasons. For example, an out-of-range chainage (PK) is clamped to an endpoint (`OUT_OF_RANGE`) and if that endpoint is not covered by any segment, `GAP_SNAP` may also apply.
 
 ---
 
 ## 5.3. Locate points
 
-Locates (interpolates) **1 or 2 points** on a calibrated line layer from manually entered `ROUTE_ID + PK`.
+Locates (interpolates) **1 or 2 points** on a calibrated line layer from manually entered `ROUTE_ID` + `Chainage/PK` (and optionally an additional ID).
 
 ### Inputs
 - **Calibrated line layer (M)** + **ROUTE_ID field**.
 - **M units**.
 - **Point 1 (required)**:
-  - `Route id (point 1)`
-  - `PK (point 1) [km+mmm] or decimal (km)`
-  - `Optional ID (point 1)` *(optional)*
+  - `ROUTE_ID (point 1)`
+  - `Chainage (PK) (point 1)`
+  - `Additional point ID (point 1)` *(optional)*
 - **Point 2 (optional)**:
   - `Define point 2` (switch)
-  - `Route id (point 2)`
-  - `PK (point 2)`
-  - `Optional ID (point 2)` *(optional)*
+  - `ROUTE_ID (point 2)`
+  - `Chainage (PK) (point 2)`
+  - `Additional point ID (point 2)` *(optional)*
+ 
+> Chainage (PK) format: `km+mmm` or decimal km (e.g., `12+345`, `12.345`, `3,05`).
 
 ### Outputs
 1) **Located points** (point layer)
 - `ROUTE_ID` (string)
-- `EVENT_ID` (string) *(only if any optional ID was provided)*
-- `PK_REQ` (string): requested PK
-- `PK` (string): located PK
+- `EVENT_ID` (string) *(only if any additional ID was provided)*
+- `PK_REQ` (string): requested chainage (PK)
+- `PK` (string): located chainage (PK)
 - `ADJUSTED` (int)
 - `ADJUST_REASON` (string)
 - `STATUS` (string) → `OK` on generated points
@@ -528,14 +530,16 @@ Locates (interpolates) **1 or 2 points** on a calibrated line layer from manuall
 
 ## 5.4. Locate points from table
 
-Locates points using an events table/layer: each row defines a point via `ROUTE_ID + PK` (and optionally an ID).
+Locates points using an events table/layer: each row defines a point via `ROUTE_ID` + `Chainage/PK` (and optionally an additional ID).
 
 ### Inputs
 - **Calibrated line layer (M)** + `ROUTE_ID` field.
 - **Events table** (each row = 1 point) with:
   - `ROUTE_ID field in the table`
-  - `PK field in the table [km+mmm] or decimal (km)`
-  - `Event ID field` *(optional)*
+  - `Chainage (PK) field in the table` [km+mmm] or decimal (km)
+  - `Additional Point ID field` *(optional)* (PK_ID)
+
+> Chainage (PK) format: `km+mmm` or decimal km (e.g., `12+345`, `12.345`, `3,05`).
 
 ### Specific options
 - **Add table fields to output**  
@@ -562,7 +566,7 @@ Locates points using an events table/layer: each row defines a point via `ROUTE_
 
 # 6. Locate segments (requires M geometry)
 
-This subgroup extracts **segments** (lines) defined by `ROUTE_ID + PK_START + PK_END` from an **M-calibrated** network/axis with valid M values (`LineStringM / MultiLineStringM`).
+This subgroup extracts **segments** (lines) defined by `ROUTE_ID` + chainage (PK) (`PK_START` + `PK_END`) from an **M-calibrated** network/axis with valid M values (`LineStringM / MultiLineStringM`).
 
 ![EXTRACT](IMAGES/EXTRACT.PNG)
 
@@ -574,8 +578,8 @@ This subgroup extracts **segments** (lines) defined by `ROUTE_ID + PK_START + PK
 
 **Common advanced options:**
 - **Tolerance (km) for M snap/rounding**: helps resolve small mismatches within calibrated coverage (**does not fix coverage discontinuities**).
-- **Adjust to nearest available PK**: controls what happens when a PK falls into a **discontinuity** (incomplete geometry or M gaps):
-  - Enabled → the endpoint can be adjusted to the nearest covered PK (`ADJUST_REASON=GAP_SNAP`).
+- **Adjust to nearest available chainage point (PK)**: controls what happens when a PK falls into a **discontinuity** (incomplete geometry or M gaps):
+  - Enabled → the endpoint can be adjusted to the nearest covered chainage (PK) (`ADJUST_REASON=GAP_SNAP`).
   - Disabled → the event becomes **critical** (`NO_MATCH`) and no geometry is produced.
 - **Generate issues table if any (adjustments/warnings/criticals)**: if enabled, records event/group issues when they exist (depending on algorithm).
 
@@ -589,8 +593,8 @@ Traceability in this subgroup relies on:
 - Optional **Issues (table)** (no geometry) with `WARNINGS` and `CRITICALS` (and, depending on the algorithm, identifier fields).
 
 ### Control fields (segment output)
-- `PK_INI` / `PK_FIN` (string): PKs finally used to extract the segment (`km+mmm`).
-- `DIST_PK_KM` (double): PK distance in km between `PK_INI` and `PK_FIN`.
+- `PK_INI` / `PK_FIN` (string): chainage (PK) values finally used to extract the segment (`km+mmm`).
+- `DIST_PK_KM` (double): chainage (PK) distance in km between `PK_INI` and `PK_FIN`.
 - `DIST_GEOM_KM` (double): geometric length of the extracted segment(s), in km.
 - `ADJUSTED` (int): `0/1`. Indicates whether any adjustment was applied.
 - `ADJUST_REASON` (string): reasons separated by `;` (e.g., `OUT_OF_RANGE;GAP_SNAP`).
@@ -599,8 +603,8 @@ Traceability in this subgroup relies on:
 
 ### Endpoint points (optional)
 Creates 2 points per segment:
-- `PK_REQ` (string): requested PK for that endpoint.
-- `PK` (string): final PK after adjustments.
+- `PK_REQ` (string): requested chainage (PK) for that endpoint.
+- `PK` (string): final chainage (PK) after adjustments.
 - `ADJUSTED` (int), `ADJUST_REASON` (string).
 - Plus identifiers (depending on algorithm): `SEG_ID`, `PAIR_ID` or `EVENT_ID`, and `ROUTE_ID`.
 
@@ -616,16 +620,16 @@ Creates 2 points per segment:
 
 **Adjustments (`ADJUST_REASON`)**
 - `OUT_OF_RANGE`: An endpoint is outside the route’s global available range (`M_min–M_max`, considering all segments) and is clamped to the nearest endpoint.
-- `GAP_SNAP`: PK is within the global range but falls into an **M-coverage discontinuity** (not interpolable in any available segment).  
-  If adjustment is enabled, the nearest covered PK is used.
+- `GAP_SNAP`: Requested chainage (PK) is within the global range but falls into an **M-coverage discontinuity** (not interpolable in any available segment).  
+  If adjustment is enabled, the nearest covered chainage (PK) is used.
 
 **Warnings (`WARNINGS`)**
 - `SEGMENT_SPLIT`: Segment generated into multiple pieces (`N_PIECES > 1`).
-- `ODD_PK_IGNORED` *(only in* **Locate segments from PK table***)*: In a `(ROUTE_ID, PAIR_ID)` group, an unpaired PK is ignored.
+- `ODD_PK_IGNORED` *(only in* **Locate segments from points/events table***)*: In a `(ROUTE_ID, PAIR_ID)` group, an unpaired event is ignored.
 
 **Criticals (`CRITICALS`) — segment is not generated**
 - `NO_ROUTE`: Requested `ROUTE_ID` does not exist (or is empty/null) in the indexed line layer.
-- `PK_INVALID`: Some PK is not parseable/convertible (e.g., non-parseable `km+mmm` text or decimal km).
+- `PK_INVALID`: Some chainage (PK) is not parseable/convertible (e.g., non-parseable `km+mmm` text or decimal km).
 - `NO_M_RANGE`: Failed to compute a valid M range for that route (considering all segments for that `ROUTE_ID`).
 - `NO_MATCH`: Failed to extract geometry for the requested segment **even if the `ROUTE_ID` exists**, typically due to:
   - endpoints in a discontinuity with `GAP_SNAP` disabled,
@@ -641,15 +645,15 @@ Creates 2 points per segment:
 In segmented networks (multiple features per `ROUTE_ID`, or non-continuous M calibration), **uncovered zones** may exist for certain PK values. L-RAT distinguishes:
 
 ### 1) Global out of range (`OUT_OF_RANGE`)
-Requested PK is outside the route’s global available range (`M_min–M_max`, considering all geometries for the `ROUTE_ID`).  
+Requested chainage (PK) is outside the route’s global available range (`M_min–M_max`, considering all geometries for the `ROUTE_ID`).  
 The algorithm clamps to the nearest endpoint and marks:
 - `ADJUSTED=1`
 - `ADJUST_REASON` includes `OUT_OF_RANGE`
 
 ### 2) M-coverage discontinuity (`GAP_SNAP`)
-PK is within the global range, but **no segment** covers it (not interpolable in any available `LineStringM`).  
-If **Adjust to nearest available PK…** is enabled, the algorithm:
-- finds the nearest **covered** PK,
+Requested chainage (PK) is within the global range, but **no segment** covers it (not interpolable in any available `LineStringM`).  
+If **Adjust to nearest available chainage point (PK)…** is enabled, the algorithm:
+- finds the nearest **covered** chainage (PK),
 - adjusts the endpoint to it,
 - marks `ADJUST_REASON` with `GAP_SNAP`.
 
@@ -660,25 +664,25 @@ If the option is disabled and an endpoint falls in a discontinuity:
 
 ## 6.3. Locate segments
 
-Extracts **1 or 2 segments** on a calibrated line layer from manually entered `ROUTE_ID + PK_INI + PK_FIN`.
+Extracts **1 or 2 segments** on a calibrated line layer from manually entered `ROUTE_ID` + chainage (PK) (`PK_INI` + `PK_FIN`)
 
 ### Inputs
 - **Calibrated line layer (M)**
-- **Route identifier field**
+- **Route identifier field** `ROUTE_ID`
 - **M units**
 - **Segment 1 (required)**:
   - `Route identifier (segment 1)`
-  - `Start PK (segment 1)`
-  - `End PK (segment 1)`
-  - `Optional segment ID (segment 1)` *(optional)*
+  - `Start chainage (PK) (segment 1)`
+  - `End chainage (PK) (segment 1)`
+  - `OAdditional segment ID (SEG_ID) (segment 1)` *(optional)*
 - **Segment 2 (optional)**:
   - `Define second segment`
   - `Route identifier (segment 2)`
-  - `Start PK (segment 2)`
-  - `End PK (segment 2)`
-  - `Optional segment ID (segment 2)` *(optional)*
+  - `Start chainage (PK) (segment 2)`
+  - `End chainage (PK) (segment 2)`
+  - `Additional segment ID (SEG_ID) (segment 2)` *(optional)*
 
-> PK format: `km+mmm` or decimal km (e.g., `12+345`, `12.345`, `3,05`).
+> Chainage (PK) format: `km+mmm` or decimal km (e.g., `12+345`, `12.345`, `3,05`).
 
 ### Specific options
 - **Generate endpoint points (optional)**: creates 2 points per segment (start/end) with `PK_REQ` vs final `PK`.
@@ -698,25 +702,25 @@ Includes `WARNINGS` and `CRITICALS` (see [6.1](#61-issues-and-traceability)).
 
 ---
 
-## 6.4. Locate segments from PK table
+## 6.4. Locate segments from points/events (PK) table
 
-Generates segments from a table where **each row provides one PK**, associated with `ROUTE_ID` and `PAIR_ID`. Segments are built by pairing PKs within each identifier group (ideally unique per segment) for correct algorithm behavior.
+Generates segments from a table where **each row provides one chainage value (PK)**, associated with `ROUTE_ID` and `PAIR_ID`. Segments are built by pairing chainage (PK) values within each identifier group (ideally unique per segment) for optimal algorithm behavior.
 
 #### How it works (pairing)
 For each `(ROUTE_ID, PAIR_ID)`:
-- Sort PKs numerically.
+- Sort chainage (PK) points numerically.
 - Pair sequentially: (0–1), (2–3), (4–5)...
-- If one PK is left unpaired, it is ignored and warning `ODD_PK_IGNORED` is recorded.
+- If one chainage (PK) point is left unpaired, it is ignored and warning `ODD_PK_IGNORED` is recorded.
 
 ### Inputs
 - **Calibrated line layer (M)** and its `ROUTE_ID` field.
-- **PK table** (each row = 1 PK):
+- **Events (PK) table** (each row = 1 chainage value (PK)):
   - `ROUTE_ID field in the table`
   - `PAIR_ID field (segment/event) in the table`
-  - `PK field in the table`
+  - Chainage (PK) field in the table`
 - **M units**
 
-> PK format: `km+mmm` or decimal km (e.g., `12+345`, `12.345`, `3,05`).
+> Chainage (PK) format: `km+mmm` or decimal km (e.g., `12+345`, `12.345`, `3,05`).
 
 ### Specific options
 - **Add table fields to output**: copies table fields to the resulting segment. If a name collides with output fields, prefix `T_` is added (e.g., `T_MY_FIELD`).
@@ -740,18 +744,18 @@ Includes `WARNINGS` (e.g., `SEGMENT_SPLIT`, `ODD_PK_IGNORED`) and `CRITICALS` (s
 
 ## 6.5. Locate segments from segment table
 
-Extracts segments from a segment table where **each row defines one segment** from `ROUTE_ID + PK_INI + PK_FIN` and (optionally) an `EVENT_ID`.
+Extracts segments from a segment table where **each row defines one segment** from `ROUTE_ID` + chainage (PK) (`PK_INI` + `PK_FIN`) and (optionally) an `EVENT_ID`.
 
 ### Inputs
 - **Calibrated line layer (M)** and its `ROUTE_ID` field.
 - **Segment table** (each row = 1 segment) with:
   - `ROUTE_ID field in the table`
-  - `Start PK field`
-  - `End PK field`
-  - `Event/segment ID field` *(optional)*
+  - `Start chainage (PK) field`
+  - `End chainage (PK) field`
+  - `Additional segment ID field (EVENT_ID)` *(optional)*
 - **M units**
 
-> PK format: `km+mmm` or decimal km (e.g., `12+345`, `12.345`, `3,05`).
+> Chainage (PK) format: `km+mmm` or decimal km (e.g., `12+345`, `12.345`, `3,05`).
 
 ### Specific options
 - **Add table fields to output**: copies table fields to the resulting segment.  
@@ -909,13 +913,13 @@ It is designed to plot the table generated by **Slope and Longitudinal Profile**
 - **X field (distance from origin, meters)** *(default `Dist_Origen_metros`)*
 - **Y field (elevation/profile)** *(default `Cota_SUAV`)*
 - **Slope field (%)** *(optional; default `SLOPE`)*: if missing, a warning is logged and slope is treated as `NaN`.
-- **Use PK (if exists)** *(bool)*: switches X-axis **labeling** to PK (`K+MMM`) using the PK (km) field. If enabled but the field does not exist, a warning is logged and PK mode is disabled.
-- **PK field (km, e.g., 91.740)** *(optional; default `m_field_PK_KM`)*
+- **Use chainage (PK) (if exists)** *(bool)*: switches X-axis **labeling** to chainage (PK) values (`K+MMM`) using the chainage (PK) field. If enabled but the field does not exist, a warning is logged and Chainage (PK) mode is disabled.
+- **Chainage (PK) field (km, e.g., 91.740)** *(optional; default `m_field_PK_KM`)*
 - **Show axis labels** (*bool*): Enabled: displays axis titles and labels. Disabled: no titles/labels are shown, which makes the plot easier to reuse in other languages.
 
-### How the X axis works (distance vs PK)
+### How the X axis works (distance vs chainage (PK))
 - The profile is **always plotted against real distance** (`X_FIELD`, meters).
-- If **Use PK** is enabled, PK is used **only to build the tick labels** on the X axis.
+- If **Use chainage (PK)** is enabled, chainage (PK) is used **only to build the tick labels** on the X axis.
 
 ### How the Y axis works (elevation)
 - The elevation axis does not necessarily start at 0; it automatically adjusts its limits to the displayed range.
@@ -961,7 +965,7 @@ From a line (axis) and a DEM, generates:
 - **Smoothing window**: number of samples in the filter window. Small windows smooth little; large windows smooth more but may flatten real changes. Typically 7–15.
 - **Polynomial order (Savitzky–Golay)**: higher values preserve complex shapes better but can amplify noise if the window is small.
 
-- **Use M (if present) to add PK to the table** *(default False)*  
+- **Use M (if present) to add chainage (PK) values to the table** *(default False)*  
   Adds `m_field_PK_KM` and `m_field_PK_MMM` to the table if the geometry has valid M.
 - **M units**: `meters` / `kilometers` (to interpret M and convert to km).
 
@@ -977,8 +981,8 @@ Fields:
 - `SLOPE_TYPE` (string: `REAL/INTERP/EXTRAP/NODATA`)
 
 *(Optional, if “Use M” and M is valid on the line)*:
-- `m_field_PK_KM` (double) — PK in km (float)
-- `m_field_PK_MMM` (string) — PK formatted `km+mmm`
+- `m_field_PK_KM` (double) — chainage (PK) in km (float)
+- `m_field_PK_MMM` (string) — chainage (PK) formatted `km+mmm`
 
 2) **Segmented profile (lines)** — 1 micro-segment between consecutive samples  
 Fields:
@@ -995,9 +999,9 @@ Fields:
 - **Smoothing**: applied to the elevation series (`Cota_RAW_metros → Cota_SUAV`).
 - **Slope (%)**: computed as `100 * dz / dx` between consecutive samples.
   - If consecutive elevations are missing, the initial slope is `None` and can later be filled (interp/extrap) to keep continuity, recorded in `SLOPE_TYPE`.
-- **PK from M (optional)**:
+- **Chainage (PK) values from M (optional)**:
   - Interpolates M along vertices.
-  - If M is not usable (e.g., some vertex has M/NaN), PK fields are `NULL`.
+  - If M is not usable (e.g., some vertex has M/NaN), chainage (PK) fields are `NULL`.
 
 ### Recommendations
 - For coherent slopes, use a **projected CRS (meters)** and a DEM with suitable resolution for the expected detail.
@@ -1019,5 +1023,5 @@ You may use it, modify it, and share it freely under the terms of this license.
 
 - LinkedIn: https://www.linkedin.com/in/javierhpiris
 - GitHub: https://github.com/Javisionario
-```
 
+```
