@@ -29,9 +29,9 @@ Repositorio: https://github.com/Javisionario/L-RAT
 - [4. Calibrate M geometry](#4-calibrate-m-geometry)
   - [4.1. Incidencias y trazabilidad](#41-incidencias-y-trazabilidad)
   - [4.2. Calibrate lines from distance](#42-calibrate-lines-from-distance)
-  - [4.3. Calibrate lines from points (events)](#43-calibrate-lines-from-points-events)
+  - [4.3. Calibrate lines from points/events](#43-calibrate-lines-from-pointsevents)
   - [4.4. Calibrate points](#44-calibrate-points)
-  - [4.5. Edit calibration (Modify M values)](#45-edit-calibration-Modify-M-values)
+  - [4.5. Edit calibration (Modify M values)](#45-edit-calibration-modify-m-values)
 
 - [5. Locate points (requires M geometry)](#5-locate-points-requires-m-geometry)
   - [5.1. Incidencias y trazabilidad](#51-incidencias-y-trazabilidad)
@@ -43,7 +43,7 @@ Repositorio: https://github.com/Javisionario/L-RAT
   - [6.1. Incidencias y trazabilidad](#61-incidencias-y-trazabilidad)
   - [6.2. Ajustes por fuera de rango y por discontinuidades de cobertura (M)](#62-ajustes-por-fuera-de-rango-y-por-discontinuidades-de-cobertura-m)
   - [6.3. Locate segments](#63-locate-segments)
-  - [6.4. Locate segments from PK table](#64-locate-segments-from-pk-table)
+  - [6.4. Locate segments from points/events (PK) table](#64-locate-segments-from-pointsevents-pk-table)
   - [6.5. Locate segments from segment table](#65-locate-segments-from-segment-table)
 
 - [7. Miscellaneous](#7-miscellaneous)
@@ -190,17 +190,17 @@ En este subgrupo, la trazabilidad se apoya en **campos de control** en las salid
 Calibra el valor **M** de una capa de líneas en función de la **distancia acumulada al origen**. El resultado es una capa `LineStringM` / `MultiLineStringM` (manteniendo Z si existe) calibrada según la distancia al origen (por feature o por ruta).
 
 ### Entradas
-- **Capa de líneas a calibrar** (con o sin M).
+- **Capa de líneas**: Geometría a calibrar (con o sin M).
 
 ### Parámetros
-- **Unidades del campo M (salida)**: `Meters (m)` / `Kilometers (km)`.
-- **Start M**: valor inicial de M (en las unidades de salida).
+- **Unidades de los valores de M (salida)**: `Meters (m)` / `Kilometers (km)`.
+- **Valor inicial de M**: valor del punto de origen (en unidades de salida).
 - **Invertir sentido**: M decrece en el sentido geométrico.
 - **Sobrescribir M existente**: si está desactivado y la geometría ya tiene M, se marca como omitida en `STATUS`.
-- (Avanzado) **Modo de longitud**: `Auto`, `Planar`, `Geodesic` (usar CRS local proyectado).
+- (Avanzado) **Modo de cálculo de longitud**: `Auto`, `Planimétrico`, `Geodesico`.
   - `Auto`: (recomendado): usa distancias **planas** si el CRS es proyectado; si el CRS es geográfico, usa un **CRS local proyectado** para medir y localizar.
-  - `Planar`: fuerza distancias planas en el CRS de la capa.
-  - `Geodesic`: fuerza el cálculo usando un CRS local proyectado.
+  - `Planimétrico`: fuerza distancias planas en el CRS de la capa.
+  - `Geodesico`: fuerza el cálculo usando un CRS local proyectado.
 
 ### Salida
 - **Líneas calibradas** (`LineStringM/MultiLineStringM`).
@@ -223,14 +223,14 @@ Calibra el valor **M** de una capa de líneas en función de la **distancia acum
 
 ---
 
-## 4.3. Calibrate lines from points (events)
+## 4.3. Calibrate lines from points/events
 
 Calibra el campo **M** de una capa de líneas a partir de **eventos puntuales** (PK) almacenados en una capa de puntos.  
 Cada punto se proyecta sobre la línea más cercana (o sobre la ruta correspondiente si se restringe por `ROUTE_ID`) y se utiliza como **punto de control** para interpolar y asignar M a lo largo del eje. El resultado es una capa LineStringM / MultiLineStringM calibrada según los PK proporcionados.
 
 ### Entradas
-- **Capa de líneas** (con o sin M): Capa lineal a calibrar (con o sin valores M previos).
-- **Capa de puntos (eventos)**: Puntos con valores de PK conocidos.
+- **Capa de líneas**: Capa lineal a calibrar (con o sin valores M previos).
+- **Capa de puntos de referencia (Eventos con PK)**: Puntos con valores de PK conocidos.
 - **Campo PK en la capa de puntos**: Campo que contiene el valor del PK.
 
 ### Parámetros
@@ -238,22 +238,22 @@ Cada punto se proyecta sobre la línea más cercana (o sobre la ruta correspondi
   - `Auto ('PK+mmm' text or infer units: m / km)`
   - `Meters (m)`
   - `Kilometers (km)`
-- **Unidades del campo M (salida)**: `Meters (m)` / `Kilometers (km)`
-- **Distancia máxima (búsqueda / proyección)**  
+- **Unidades de los valores de M de salida**: `Meters (m)` / `Kilometers (km)`
+- **Distancia de búsqueda/proyección máxima**  
   Umbral máximo para aceptar el emparejado punto–línea. Si el match más cercano queda más lejos, el punto se marca como incidencia (`TOO_FAR`) y no contribuye a la calibración. 
-- **Tolerancia de snap en extremos (para construir la referencia por ruta)**  
+- **Tolerancia de ajuste (snap) en extremos (referencia por ruta)**  
   Tolerancia usada al construir la referencia por `ROUTE_ID` (cuando se agrupa por ruta).
 
 ### Opciones
 - **Agrupar por ROUTE_ID**: (Requiere indicar el campo `ROUTE_ID` en puntos y líneas). Fuerza que los PK solo calibren su vía correspondiente. Además, el algoritmo detecta automáticamente forks y ejes paralelos y genera `warnings` si pueden afectar a la calibración.
 - **Añadir ROUTE_ID a la salida (desde puntos)**: Si la salida ya tiene un campo `ROUTE_ID`, se crea `ROUTE_ID_FROM_PTS` para no sobreescribirlo.
-- **Ajustar comportamiento fuera del rango de puntos (extrapolación)**:
-  - `Extrapolar linealmente`: prolonga linealmente usando la pendiente de los controles extremos.
-  - `Recortar (clamp)`: fija M al valor del control extremo más cercano (tramo constante y plano fuera de rango).
-  - `Dejar NULL (NaN)`: deja M sin asignar fuera del rango (NULL/NaN), útil para identificar tramos sin calibración.
+- **Comportamiento fuera del rango de puntos de control**:
+  - `Extrapolación lineal`: prolonga linealmente usando la pendiente de los controles extremos.
+  - `Recortar al rango`: fija M al valor del control extremo más cercano (tramo constante y plano fuera de rango).
+  - `Asignar NULL (NaN)`: deja M sin asignar fuera del rango (NULL/NaN), útil para identificar tramos sin calibración.
 
-- *(Avanzado)* **Factor**: `M_final = M * factor`  
-- *(Avanzado)* **Offset**: `M_final = M + offset`
+- *(Avanzado)* **Añadir multiplicador**: `M_final = M * factor`  
+- *(Avanzado)* **Añadir desplazamiento**: `M_final = M + offset`
   
 - *(Avanzado)* **Generar tabla de incidencias**: Se crea solo si se activa y existen incidencias.
 - *(Avanzado)* **Generar puntos proyectados**: Permite comprobar la ubicación de los puntos proyectados frente a la capa de entrada.
@@ -331,7 +331,7 @@ Asigna a cada punto un **PK (km+mmm)** a partir del valor **M interpolado**, pro
 
 ### Parámetros
 - **Unidades del campo M**: m o km
-- **Distancia máxima (búsqueda/proyección)**: umbral para aceptar el emparejado (si el eje más cercano está más lejos, se marca incidencia)
+- **Distancia de búsqueda/proyección máxima**: umbral para aceptar el emparejado (si el eje más cercano está más lejos, se marca incidencia)
 
 ### Opciones
 - **Restringir emparejado por ROUTE_ID** (requiere `ROUTE_ID` en puntos y líneas)
@@ -378,12 +378,12 @@ Está pensado para:
 
 ### Operaciones
 El algoritmo aplica las operaciones en el siguiente orden general:
-**Factor/Offset → Invertir → Fijar origen → Clamp → Monotonía**.
+**Factor/Desplazamiento → Invertir → Establecer M inicial → Recortar → Monotonía**.
 
-- **Offset**: Desplaza todos los M una cantidad constante:`M' = M + offset`
+- **Desplazamiento**: Desplaza todos los M una cantidad constante:`M' = M + offset`
 - **Factor**: Escala todos los M. Útil para conversión de unidades o recalibración (ej.: km ↔ m):`M' = M * factor`
 - **Invertir M (manteniendo rango)**: Invierte el sentido de M sin cambiar el rango: `M' = (Mmin + Mmax) − M`
-- **Fijar origen (TARGET_START)**: Aplica un desplazamiento uniforme para que el primer vértice tenga el M indicado, manteniendo el resto consistente a partir de `TARGET_START`
+- **Establecer M inicial (TARGET_START)**: Aplica un desplazamiento uniforme para que el primer vértice tenga el M indicado, manteniendo el resto consistente a partir de `TARGET_START`
 - **Recortar (Clamp) al rango [min, max]**: Limita M a un intervalo mínimo/máximo, sirve para limpiar valores fuera de rango sin “remapear” la calibración (no comprime ni estira). Puede crear tramos planos al inicio o al final
 - **Forzar monotonía**: corrige “rebotes” para que M sea siempre creciente o decreciente (con `epsilon`)
 
@@ -391,7 +391,7 @@ El algoritmo aplica las operaciones en el siguiente orden general:
 - **Requerir M** (avanzado): Si se activa “Requerir M”, las geometrías sin M se marcan con `STATUS=NO_M_VALUES`. Si no se exige M, se omiten con `STATUS=SKIPPED_NO_M`.
 
 ### Ámbito (avanzado)
-- **Por feature** (recomendado): Aplica operaciones usando el rango/origen de cada feature.
+- **Por entidad/feature** (recomendado): Aplica operaciones usando el rango/origen de cada feature.
 - **Por ROUTE_ID** (requiere `ROUTE_ID`): Usa un rango/origen común para varias features (útil si una ruta está partida).
 
 ### Salidas
@@ -414,7 +414,7 @@ Los algoritmos de este subgrupo localizan (interpolan) puntos sobre una red/eje 
 
 - **Capa lineal calibrada** (`LineStringM / MultiLineStringM`): red/eje con valores M.
 - **Campo ROUTE_ID**: campo `ROUTE_ID` (string) sobre el que se indexan rutas.
-- **Unidades de M** (km o m)
+- **Unidades de los valores de M** (km o m)
 
 **Opciones avanzadas (comunes):**
 - **Tolerancia (km)**: corrige pequeños desajustes dentro de tramo calibrado (redondeos o calibración imperfecta). **No corrige discontinuidades de cobertura**: solo ayuda si el PK cae muy cerca de un valor existente/interpolable.
@@ -476,7 +476,7 @@ El algoritmo recorta el PK al extremo más cercano y marca:
 
 ### 2) Discontinuidad de cobertura (de M) (`GAP_SNAP`)
 El PK está dentro del rango global, pero **ningún tramo** de esa ruta lo cubre (no es interpolable en ningún `LineStringM` disponible).  
-Si está activada la opción **Ajustar al PK disponible más cercano…**, el algoritmo:
+Si está activada la opción **Ajustar al PK disponible más cercano**, el algoritmo:
 - busca el **PK cubierto más cercano**,
 - ajusta el PK a ese valor,
 - marca `ADJUST_REASON` con `GAP_SNAP`.
@@ -493,16 +493,16 @@ Localiza (interpola) **1 o 2 puntos** sobre una capa lineal calibrada a partir d
 
 ### Entradas
 - **Capa de líneas calibrada (M)** + **campo ROUTE_ID**.
-- **Unidades del campo M**.
+- **Unidades de los valores de M**.
 - **Punto 1 (obligatorio)**:
   - `Route id (punto 1)`
   - `PK (punto 1) [km+mmm] o número decimal (km)`
-  - `ID opcional (punto 1)` *(opcional)*
+  - `ID adicional (punto 1)` *(opcional)*
 - **Punto 2 (opcional)**:
   - `Definir punto 2` (switch)
   - `Route id (punto 2)`
   - `PK (punto 2)`
-  - `ID opcional (punto 2)` *(opcional)*
+  - `ID adicional (punto 2)` *(opcional)*
 
 ### Salidas
 1) **Puntos localizados** (capa de puntos)
@@ -531,10 +531,10 @@ Localiza puntos usando una tabla/capa de eventos: cada fila define un punto medi
 
 ### Entradas
 - **Capa de líneas calibrada (M)** + campo `ROUTE_ID`.
-- **Tabla de eventos (cada fila = 1 punto)** con:
+- **Tabla de eventos/puntos** con:
   - `Campo ROUTE_ID en la tabla`
   - `Campo PK en la tabla [km+mmm] o número decimal (km)`
-  - `Campo ID de evento` *(opcional)*
+  - `Campo de ID adicional` *(opcional)*
 
 ### Opciones específicas
 - **Añadir campos de la tabla a la salida**  
@@ -544,7 +544,7 @@ Localiza puntos usando una tabla/capa de eventos: cada fila define un punto medi
 ### Salidas
 1) **Puntos localizados** (capa de puntos)
 - `ROUTE_ID` (string)
-- `PK_ID` (string) *(solo si se configuró “Campo ID de evento”)*
+- `PK_ID` (string) *(solo si se configuró “Campo de ID adicional”)*
 - `PK_REQ`, `PK`, `ADJUSTED`, `ADJUST_REASON`, `STATUS`
 - *(Opcional)* campos de la tabla (si se activó “Añadir campos…”; con `_TBL` si hay colisión)
 
@@ -567,7 +567,7 @@ Los algoritmos de este subgrupo extraen **segmentos** (líneas) definidos por `R
 ### Parámetros comunes
 
 - **Capa de líneas calibrada (M)** (`LineStringM / MultiLineStringM`) y su **campo ROUTE_ID** en base al que se identifica la vía a extraer.
-- **Unidades del campo M**: `Meters (m)` / `Kilometers (km)`.
+- **Unidades de los valores de M**: `Meters (m)` / `Kilometers (km)`.
 - **Generar puntos de extremos** *(opcional)*: crea 2 puntos por segmento (inicio/fin) con `PK_REQ` (solicitado) y `PK` finalmente usado.
 
 **Opciones avanzadas (comunes):**
@@ -667,13 +667,13 @@ Extrae **1 o 2 segmentos** sobre una capa lineal calibrada a partir de `ROUTE_ID
   - `Identificador de vía (segmento 1)`
   - `PK inicio (segmento 1)`
   - `PK fin (segmento 1)`
-  - `ID opcional del segmento (segmento 1)` *(opcional)*
+  - `ID adicional de segmento (segmento 1)` *(opcional)* (SEG_ID)
 - **Segmento 2 (opcional)**:
   - `Definir segundo segmento`
   - `Identificador de vía (segmento 2)`
   - `PK inicio (segmento 2)`
   - `PK fin (segmento 2)`
-  - `ID opcional del segmento (segmento 2)` *(opcional)*
+  - `ID adicional de segmento (segmento 2)` *(opcional)* (SEG_ID)
 
 >Formato de PK: `km+mmm` o número decimal en km (ej.: `12+345`, `12.345`, `3,05`).
 
@@ -684,7 +684,7 @@ Extrae **1 o 2 segmentos** sobre una capa lineal calibrada a partir de `ROUTE_ID
 1) **Segmentos extraídos (líneas)**  
 Campos típicos:
 - `ROUTE_ID` (string)
-- `SEG_ID` (string) *(solo si se proporcionó algún ID opcional en segmento 1/2)*
+- `SEG_ID` (string) *(solo si se proporcionó ID opcional en segmento 1/2)*
 - `PK_INI`, `PK_FIN`, `DIST_PK_KM`, `DIST_GEOM_KM`, `ADJUSTED`, `ADJUST_REASON`, `N_PIECES`, `STATUS`
 
 2) **Puntos extremos (opcional)**  
@@ -695,7 +695,7 @@ Incluye `WARNINGS` y `CRITICALS` (ver [6.1](#61-incidencias-y-trazabilidad)).
  
 ---
 
-## 6.4. Locate segments from PK table
+## 6.4. Locate segments from points/events (PK) table
 
 Genera segmentos desde una tabla donde **cada fila aporta un PK**, asociado a `ROUTE_ID` y `PAIR_ID`. Identifica los segmentos mediante la relación de pares de PKs con dicho identificador que idealmente ha de ser único para cada segmento para un correcto funcionamiento del algoritmo.
 
@@ -900,9 +900,9 @@ Está diseñado para graficar la tabla generada por **Slope and Longitudinal Pro
 ### Parámetros
 - **Campo ID (un gráfico por ID)** *(opcional; por defecto `ID_Segmento`)*: Si existe, genera un conjunto de gráficos por cada ID. Si el campo no existe, se registra warning y se trata todo como un único grupo (`ALL`). 
 - **Campo X (distancia desde origen, en metros)** *(por defecto `Dist_Origen_metros`)*
-- **Campo Y (cota / perfil)** *(por defecto `Cota_SUAV`)*
+- **Campo Y (elevación / perfil)** *(por defecto `Cota_SUAV`)*
 - **Campo pendiente (%)** *(opcional; por defecto `SLOPE`)*: Si el campo no existe, se registra warning y la pendiente se considera `NaN`.
-- **Usar PK (si existe)** *(bool)*: Cambia el **etiquetado** del eje X a PK (`K+MMM`) usando el campo PK (km). Si se activa pero el campo no existe, se registra warning y se desactiva el modo PK.
+- **Usar PK en el eje X (si existe)** *(bool)*: Cambia el **etiquetado** del eje X a PK (`K+MMM`) usando el campo PK (km). Si se activa pero el campo no existe, se registra warning y se desactiva el modo PK.
 - **Campo PK (km, ej. 91.740)** *(opcional; por defecto `m_field_PK_KM`)*
 - **Mostrar etiquetas de ejes** (*bool*): Activado: muestra títulos y nombres de ejes. Desactivado: no se muestra letreros, lo que favorece el uso del gráfico en otros idiomas.
 
@@ -937,14 +937,14 @@ A partir de una línea (eje) y un DEM, genera:
 
 ### Parámetros (básicos)
 - **Campo ID del segmento (opcional)**: si se indica, se conserva como `ID_Segmento` en salidas.
-- **Paso de muestreo (m). 0 = resolución del raster** *(por defecto 0)*: si `=0`, el algoritmo calcula un paso automático a partir del **tamaño de píxel** del DEM (convertido a metros).
+- **Intervalo de muestreo (m). 0 = resolución del raster** *(por defecto 0)*: si `=0`, el algoritmo calcula un paso automático a partir del **tamaño de píxel** del DEM (convertido a metros).
 - **Invertir sentido del perfil**: cambia el origen (inicio ↔ fin).
 
 ### Opciones avanzadas
 - **Método de muestreo del DEM**:
   - `Nearest`: toma el valor del píxel más cercano. Método rápido que conserva los valores originales si bien puede ofrecer un resultado escalonado.
-  - `Bilinear`: interpola usando 4 píxeles vecinos, ofreciendo un resultado suave y estable.
-  - `Cubic` *(por defecto `Cubic` con fallback a bilinear si falla)*: interpola usando un vecindario mayor (más suave, más lento).
+  - `Bilineal`: interpola usando 4 píxeles vecinos, ofreciendo un resultado suave y estable.
+  - `Cubico` *(por defecto `Cubic` con fallback a bilinear si falla)*: interpola usando un vecindario mayor (más suave, más lento).
 
 - **Suavizado del perfil** *(por defecto `Savitzky–Golay`)*:
   - `Ninguno`
