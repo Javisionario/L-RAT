@@ -153,7 +153,7 @@ Algorithms appear in the **Processing Toolbox** under these subgroups:
 
 # 4. Calibrate M geometry
 
-This subgroup provides tools to **calibrate**  chainage (PK) values to prepare data for linear-referencing workflows. These algorithms add or edit calibration values on existing geometries.
+This subgroup provides tools to **calibrate** chainage (PK) values to prepare data for linear-referencing workflows. These algorithms add or edit calibration values on existing geometries.
 
 ![CALIBRATE](IMAGES/CALIBRATE.PNG)
 
