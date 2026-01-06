@@ -6,7 +6,7 @@ L-RAT es un **plugin de Processing para QGIS** orientado a flujos de trabajo de 
 
 - **Calibración (PK/M)**: añadir/derivar PK/M en geometrías (calcular PK de puntos por proximidad; generar/ajustar M en líneas).
 - **Referenciación lineal (PK/M)**: localizar **puntos** y extraer **segmentos** sobre líneas calibradas (`LineStringM / MultiLineStringM`).
-- **Perfiles y pendientes**: calcular perfil longitudinal y pendientes desde un eje y un DEM, y generar gráficos/salidas para cartografía.
+- **Perfiles y pendientes**: calcular perfil longitudinal y pendientes desde un eje y un DEM, y generar gráficos/salidas para cartografía. (no requiere PK/M)
 - **Misc**: análisis geométrico sobre capas lineales (p. ej., detección de curvas y centros).
 
 Repositorio: https://github.com/Javisionario/L-RAT
@@ -117,7 +117,7 @@ L-RAT intenta ser flexible con la entrada de PK y acepta formatos habituales:
 
 ---
 
-## 1.6 Gestion de incidencias
+## 1.6 Gestión de incidencias
 
 L-RAT puede registrar incidencias para auditar ajustes, avisos y errores:
 - en **campos de salida** (p.ej. `ADJUSTED`, `ADJUST_REASON`, `STATUS`),
@@ -133,7 +133,7 @@ L-RAT puede registrar incidencias para auditar ajustes, avisos y errores:
 - **Desde el repositorio oficial de plugins (recomendado)**: cuando esté publicado, instálalo desde **QGIS → Plugins → Administrar e instalar plugins** → All → Busca `L-RAT`.
 - **Desde ZIP/GitHub** (desarrollo):
   1. Descarga el ZIP del repositorio.
-  2. **QGIS → Plugins → Administrar e instalar plugins** → Instalar desde ZIP → Busca la carpeta descargada.
+  2. **QGIS → Plugins → Administrar e instalar plugins** → Instalar desde ZIP → selecciona el ZIP descargado.
 
 ---
 
@@ -197,10 +197,10 @@ Calibra el valor **M** de una capa de líneas en función de la **distancia acum
 - **Valor inicial de M**: valor del punto de origen (en unidades de salida).
 - **Invertir sentido**: M decrece en el sentido geométrico.
 - **Sobrescribir M existente**: si está desactivado y la geometría ya tiene M, se marca como omitida en `STATUS`.
-- (Avanzado) **Modo de cálculo de longitud**: `Auto`, `Planimétrico`, `Geodesico`.
+- (Avanzado) **Modo de cálculo de longitud**: `Auto`, `Planimétrico`, `Geodésico`.
   - `Auto`: (recomendado): usa distancias **planas** si el CRS es proyectado; si el CRS es geográfico, usa un **CRS local proyectado** para medir y localizar.
   - `Planimétrico`: fuerza distancias planas en el CRS de la capa.
-  - `Geodesico`: fuerza el cálculo usando un CRS local proyectado.
+  - `Geodésico`: fuerza el cálculo usando un CRS local proyectado.
 
 ### Salida
 - **Líneas calibradas** (`LineStringM/MultiLineStringM`).
@@ -323,7 +323,7 @@ Cada punto se proyecta sobre la línea más cercana (o sobre la ruta correspondi
 
 ## 4.4. Calibrate points
 
-Asigna a cada punto un **PK (km+mmm)** a partir del valor **M interpolado**, proyectando el punto sobre una capa lineal calibrada (`LineStringM / MultiLineStringM`).  No modifica la geometría del punto: añade campos de calibración en atributos.
+Asigna a cada punto un **PK (km+mmm)** a partir del valor **M interpolado**, proyectando el punto sobre una capa lineal calibrada (`LineStringM / MultiLineStringM`). No modifica la geometría del punto: añade campos de calibración en atributos.
 
 ### Entradas
 - **Capa de puntos a calibrar**
@@ -406,7 +406,7 @@ El algoritmo aplica las operaciones en el siguiente orden general:
 
 # 5. Locate points (requires M geometry)
 
-Los algoritmos de este subgrupo localizan (interpolan) puntos sobre una red/eje **calibrado con geometría M** con valores válidos(`LineStringM / MultiLineStringM`) a partir de `ROUTE_ID + PK`.
+Los algoritmos de este subgrupo localizan (interpolan) puntos sobre una red/eje **calibrado con geometría M** con valores válidos (`LineStringM / MultiLineStringM`) a partir de `ROUTE_ID + PK`.
 ![LOCATE](IMAGES/LOCATE.PNG)
 
 
@@ -418,7 +418,7 @@ Los algoritmos de este subgrupo localizan (interpolan) puntos sobre una red/eje 
 
 **Opciones avanzadas (comunes):**
 - **Tolerancia (km)**: corrige pequeños desajustes dentro de tramo calibrado (redondeos o calibración imperfecta). **No corrige discontinuidades de cobertura**: solo ayuda si el PK cae muy cerca de un valor existente/interpolable.
-- **Ajustar al PK disponible más cercano**: controla qué ocurre cuando el PK cae en una **discontinuidad** (por geometría incompleta  o cobertura de M):
+- **Ajustar al PK disponible más cercano**: controla qué ocurre cuando el PK cae en una **discontinuidad** (por geometría incompleta o cobertura de M):
   - Activado → el punto puede generarse ajustando el PK al valor **cubierto** más cercano (`ADJUST_REASON=GAP_SNAP`).
   - Desactivado → el evento pasa a **crítico** (`NO_MATCH`) y no se crea el punto.
 - **Generar tabla de incidencias (ajustes/críticos)**  
@@ -487,6 +487,7 @@ Si esa opción está desactivada y el PK cae en una discontinuidad:
 > Un mismo evento puede acumular ambos motivos: por ejemplo, un PK fuera de rango se recorta al extremo (`OUT_OF_RANGE`) y, si ese extremo no está cubierto por ningún tramo, puede aplicarse además `GAP_SNAP`.
 
 ---
+
 ## 5.3. Locate points
 
 Localiza (interpola) **1 o 2 puntos** sobre una capa lineal calibrada a partir de `ROUTE_ID + PK` introducidos manualmente.
@@ -496,13 +497,15 @@ Localiza (interpola) **1 o 2 puntos** sobre una capa lineal calibrada a partir d
 - **Unidades de los valores de M**.
 - **Punto 1 (obligatorio)**:
   - `Route id (punto 1)`
-  - `PK (punto 1) [km+mmm] o número decimal (km)`
+  - `PK (punto 1)`
   - `ID adicional (punto 1)` *(opcional)*
 - **Punto 2 (opcional)**:
   - `Definir punto 2` (switch)
   - `Route id (punto 2)`
   - `PK (punto 2)`
   - `ID adicional (punto 2)` *(opcional)*
+ 
+> Formato de PK: `km+mmm` o decimal km (e.j., `12+345`, `12.345`, `3,05`).
 
 ### Salidas
 1) **Puntos localizados** (capa de puntos)
@@ -533,8 +536,10 @@ Localiza puntos usando una tabla/capa de eventos: cada fila define un punto medi
 - **Capa de líneas calibrada (M)** + campo `ROUTE_ID`.
 - **Tabla de eventos/puntos** con:
   - `Campo ROUTE_ID en la tabla`
-  - `Campo PK en la tabla [km+mmm] o número decimal (km)`
+  - `Campo PK en la tabla`
   - `Campo de ID adicional` *(opcional)*
+
+> Formato de PK: `km+mmm` o decimal km (e.j., `12+345`, `12.345`, `3,05`).
 
 ### Opciones específicas
 - **Añadir campos de la tabla a la salida**  
@@ -572,10 +577,10 @@ Los algoritmos de este subgrupo extraen **segmentos** (líneas) definidos por `R
 
 **Opciones avanzadas (comunes):**
 - **Tolerancia (km) para encaje por M (snap/rounding)**: ayuda a resolver pequeños desajustes dentro de un tramo calibrado (**no corrige discontinuidades de cobertura**).
-- **Ajustar al PK disponible más cercano**: controla qué ocurre cuando el PK cae en una **discontinuidad** (por geometría incompleta  o cobertura de M):
+- **Ajustar al PK disponible más cercano**: controla qué ocurre cuando el PK cae en una **discontinuidad** (por geometría incompleta o cobertura de M):
   - Activado → el extremo puede ajustarse al PK más cercano (`ADJUST_REASON=GAP_SNAP`).
   - Desactivado → el evento pasa a **crítico** (`NO_MATCH`) y no se genera geometría.
-- **Generar tabla de incidencias si hubiera (ajustes/warnings/críticos)**: si está activada,registra incidencias por evento/grupo en caso de que las haya (según algoritmo).
+- **Generar tabla de incidencias si hubiera (ajustes/warnings/críticos)**: si está activada, registra incidencias por evento/grupo en caso de que las haya (según algoritmo).
 
 ---
 
@@ -675,7 +680,7 @@ Extrae **1 o 2 segmentos** sobre una capa lineal calibrada a partir de `ROUTE_ID
   - `PK fin (segmento 2)`
   - `ID adicional de segmento (segmento 2)` *(opcional)* (SEG_ID)
 
->Formato de PK: `km+mmm` o número decimal en km (ej.: `12+345`, `12.345`, `3,05`).
+> Formato de PK: `km+mmm` o número decimal en km (ej.: `12+345`, `12.345`, `3,05`).
 
 ### Opciones específicas
 - **Generar puntos de extremos (opcional)**: crea 2 puntos por segmento (inicio/fin) con `PK_REQ` vs `PK`.
@@ -713,7 +718,7 @@ Para cada `(ROUTE_ID, PAIR_ID)`:
   - `Campo PK en la tabla`
 - **Unidades del campo M**
 
->Formato de PK: `km+mmm` o número decimal en km (ej.: `12+345`, `12.345`, `3,05`).
+> Formato de PK: `km+mmm` o número decimal en km (ej.: `12+345`, `12.345`, `3,05`).
 
 ### Opciones específicas
 - **Añadir campos de la tabla a la salida**: copia campos de la tabla al segmento resultante. Si hay colisión con campos propios de salida, se añade prefijo `T_` (p.ej. `T_MI_CAMPO`).
@@ -748,7 +753,7 @@ Extrae segmentos desde una tabla de segmentos donde **cada fila define un tramo*
   - `Campo ID de evento/segmento` *(opcional)*
 - **Unidades del campo M**
 
->Formato de PK: `km+mmm` o número decimal en km (ej.: `12+345`, `12.345`, `3,05`).
+> Formato de PK: `km+mmm` o número decimal en km (ej.: `12+345`, `12.345`, `3,05`).
 
 ### Opciones específicas
 - **Añadir campos de la tabla a la salida**: copia campos de la tabla al segmento resultante.  
@@ -952,7 +957,7 @@ A partir de una línea (eje) y un DEM, genera:
   - `Mediana móvil`: Sustituye cada valor por la mediana de la ventana. Es robusta frente a valores extremos, por lo que suele ser una buena opción cuando el DEM tiene artefactos locales (árboles, puentes...)
   - `Savitzky–Golay` *(requiere numpy; si no está disponible, hace fallback a media móvil)*:Suaviza preservando la forma mejor que la media movil, aunque puede introducir ruido ante una ventana pequeña y un orden elevado
 
-- **Ventana de suavizado**: Número de muestras usadas en el filtro. Ventanas pequeñas suavizan poco; ventanas grandes suavizan más pero pueden “aplanar” cambios reales. Tipicamente, 7-15.
+- **Ventana de suavizado**: Número de muestras usadas en el filtro. Ventanas pequeñas suavizan poco; ventanas grandes suavizan más pero pueden “aplanar” cambios reales. Típicamente, 7-15.
 - **Orden polinómico (Savitzky–Golay)**: Valores altos preservan mejor formas complejas, pero pueden amplificar ruido si la ventana es pequeña.
 
 - **Usar M (si existe) para añadir PK en la tabla** *(por defecto False)*  
