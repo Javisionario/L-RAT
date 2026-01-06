@@ -117,7 +117,7 @@ L-RAT intenta ser flexible con la entrada de PK y acepta formatos habituales:
 
 ---
 
-## 1.6 Gestión de incidencias
+## 1.6. Gestión de incidencias
 
 L-RAT puede registrar incidencias para auditar ajustes, avisos y errores:
 - en **campos de salida** (p.ej. `ADJUSTED`, `ADJUST_REASON`, `STATUS`),
@@ -1008,14 +1008,14 @@ Campos:
 
 ---
 
-## 9. Licencia
+# 9. Licencia
 
 Este proyecto se distribuye bajo la GNU General Public License v3.0 (GPL-3.0).
 Puedes usarlo, modificarlo y compartirlo libremente bajo los términos de esta licencia.
 
 ---
 
-## 10. Autor
+# 10. Autor
 
 - LinkedIn: https://www.linkedin.com/in/javierhpiris  
 - GitHub: https://github.com/Javisionario
