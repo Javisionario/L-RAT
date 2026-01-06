@@ -1,0 +1,36 @@
+Genera segmentos desde una tabla donde <strong>cada fila aporta un PK</strong>, asociado a <strong>ROUTE_ID</strong> y <strong>PAIR_ID</strong> (identificador de emparejado).
+<hr>
+
+<h3>CÓMO FUNCIONA</h3>
+Para cada (<strong>ROUTE_ID</strong>, <strong>PAIR_ID</strong>):
+&#8226; Ordena los PK numéricamente.
+&#8226; Empareja secuencialmente: (0–1), (2–3), (4–5)...
+&#8226; Si queda un PK suelto, se ignora y se registra el aviso <code>{self.WARN_ODD_PK_IGNORED}</code>.
+<hr>
+
+<h3>ENTRADAS</h3>
+&#8226; <strong>Capa de líneas calibrada (M)</strong> y su campo <strong>ROUTE_ID</strong>
+&#8226; <strong>Tabla de PK</strong> con campos: <strong>ROUTE_ID</strong>, <strong>PAIR_ID</strong>, <strong>PK</strong>
+&#8226; <strong>Unidades de los valores de M</strong> (m o km)
+&#8226; <strong>Segmento</strong>: PK + ROUTE_ID value + PAIR_ID value
+<hr>
+
+<h3>OPCIONES</h3>
+&#8226; <strong>Añadir campos de la tabla a la salida</strong> (opcional).
+&#8226; <strong>Generar puntos de extremos</strong> (opcional).
+<hr>
+
+<h3>OPCIONES AVANZADAS</h3>
+&#8226; <strong>Tolerancia (km)</strong>: ayuda a resolver pequeños desajustes dentro de un tramo calibrado (no rellena huecos).
+&#8226; <strong>Ajustar al PK disponible más cercano</strong>: si un extremo cae en un hueco, puede ajustarse al PK válido más cercano.
+&#8226; <strong>Generar tabla de incidencias</strong>: registra ajustes/avisos/errores por segmento.
+<hr>
+
+<h3>SALIDAS</h3>
+&#8226; <strong>Segmentos extraídos</strong> con campos típicos: <code>ROUTE_ID</code>, <code>PAIR_ID</code>, <code>PK_INI</code>, <code>PK_FIN</code>, <code>DIST_PK_KM</code>, <code>DIST_GEOM_KM</code>, <code>ADJUSTED</code>, <code>ADJUST_REASON</code>, <code>N_PIECES</code>, <code>STATUS</code>.
+&#8226; <strong>Puntos extremos</strong> (opcional) con <code>PK_REQ</code>, <code>PK</code>, <code>ADJUSTED</code>, <code>ADJUST_REASON</code>.
+&#8226; <strong>Incidencias (tabla)</strong> (opcional) con <code>WARNINGS</code> (p.ej. <code>{self.WARN_SEGMENT_SPLIT}</code>, <code>{self.WARN_ODD_PK_IGNORED}</code>) y <code>CRITICALS</code>.
+<hr>
+
+<h3>DETALLES</h3>
+Consulta el README del plugin: <a href="https://github.com/Javisionario/L-RAT/blob/main/README.md#64-locate-segments-from-pointsevents-pk-table">Locate segments from PK table</a>.

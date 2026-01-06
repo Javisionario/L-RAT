@@ -1,0 +1,21 @@
+Detecta <strong>segmentos de curva</strong> en una capa de líneas, estima su <strong>radio de curvatura</strong> y genera una capa de curvas. Opcionalmente calcula centros de curvatura y los agrupa por distancia (clusters) para generar una capa de centroides.
+<hr>
+
+<h3>ENTRADAS</h3>
+&#8226; <strong>Capa de líneas</strong> de entrada (recomendado: CRS proyectado en metros)
+<hr>
+
+<h3>PARÁMETROS</h3>
+&#8226; <strong>Intervalo de densificación</strong>: controla el detalle (más pequeño = más detalle y más coste).
+&#8226; <strong>Radio mínimo / máximo</strong>: filtra curvas demasiado cerradas o demasiado planas.
+&#8226; <strong>Distancia mínima entre vértices</strong>: evita cálculos inestables con puntos muy cercanos.
+&#8226; <strong>Generar capa de centros</strong> (opcional) + <strong>distancia de agrupación</strong>.
+<hr>
+
+<h3>SALIDAS</h3>
+&#8226; <strong>Capa de segmentos de curva</strong> con: <code>ID_Curva</code>, <code>ID_Centroide</code>, <code>Radio</code>, <code>Longitud</code>.
+&#8226; <strong>Capa de centroides</strong> (opcional) con: <code>ID_Centroide</code>, <code>Radio_medio</code>, <code>Conteo</code>.
+<hr>
+
+<h3>DETALLES</h3>
+Consulta el README del plugin: <a href="https://github.com/Javisionario/L-RAT?tab=readme-ov-file#71-curve-detection-and-curvature-centers">Curve Detection and Curvature Centers</a>.

@@ -1,0 +1,22 @@
+Localiza (interpola) <strong>1 o 2 puntos</strong> sobre una capa lineal <strong>calibrada</strong> con geometría M <i>LineStringM</i>/<i>MultiLineStringM</i>, a partir de <strong>ROUTE_ID + PK</strong> introducidos manualmente.
+<hr>
+
+<h3>ENTRADAS</h3>
+&#8226; <strong>Capa de líneas calibrada (M)</strong> y su campo <strong>ROUTE_ID</strong>
+&#8226; <strong>Unidades de los valores de M</strong> (m o km)
+&#8226; <strong>Point</strong>: PK + ROUTE_ID
+<hr>
+
+<h3>OPCIONES AVANZADAS</h3>
+&#8226; <strong>Tolerancia (km)</strong>: ayuda a resolver pequeños desajustes dentro de un tramo calibrado (no rellena huecos).
+&#8226; <strong>Ajustar al PK disponible más cercano</strong>: si el PK solicitado cae en un hueco entre tramos, puede “snappear” al PK válido más cercano.
+&#8226; <strong>Generar tabla de incidencias</strong>: registra ajustes y errores por evento.
+<hr>
+
+<h3>SALIDAS</h3>
+&#8226; <strong>Puntos localizados</strong> con campos típicos: <code>PK_REQ</code>, <code>PK</code>, <code>ADJUSTED</code>, <code>ADJUST_REASON</code>, <code>STATUS</code>.
+&#8226; <strong>Incidencias (tabla)</strong> (opcional) con <code>WARNINGS</code> y <code>CRITICALS</code> (si hubo incidencias).
+<hr>
+
+<h3>DETALLES</h3>
+Consulta el README del plugin: <a href="https://github.com/Javisionario/L-RAT?tab=readme-ov-file#53-locate-points">Locate points</a>.

@@ -1,0 +1,30 @@
+Generate a <strong>longitudinal profile</strong> and <strong>slopes (%)</strong> from a line layer (axes) and a <strong>DEM</strong> (local raster or WCS).
+<hr>
+
+<h3>INPUTS</h3>
+&#8226; <strong>Line layer</strong>: axis/axes to analyze.
+&#8226; <strong>DEM</strong>: elevation raster (local or WCS).
+&#8226; <strong>ID field</strong> (optional): identifier to preserve in outputs.
+&#8226; <strong>Sampling step (m)</strong>: distance between samples. <strong>0</strong> = DEM resolution. <strong>Recommended</strong>: minimum pixel size ×3.
+&#8226; <strong>Reverse direction</strong>: changes the profile origin (start ↔ end).
+<hr>
+
+<h3>OUTPUTS</h3>
+&#8226; <strong>Table</strong> (no geometry): one row per sample with distance, elevation (RAW), smoothed elevation, slope (%), and <strong>SLOPE_TYPE</strong> (REAL/INTERP/EXTRAP/NODATA).
+This table can be easily plotted with L-RAT’s <strong>Profile Slope Plotter</strong> algorithm.
+&#8226; <strong>Segmented layer</strong> (lines): micro-segments between samples with elevation and slope attributes for cartographic/graphical outputs.
+<hr>
+
+<h3>ADVANCED OPTIONS</h3>
+&#8226; <strong>DEM sampling</strong>: Nearest / Bilinear / Cubic.
+&#8226; <strong>Smoothing</strong>: None / Moving average / Moving median / Savitzky-Golay (window and order).
+&#8226; <strong>Use M</strong> (if present): adds chainage (PK) values to the table (km and km+mmm format).
+<hr>
+
+<h3>TIPS</h3>
+&#8226; For consistent slopes, use data in a <strong>projected CRS</strong> (meters).
+&#8226; If the DEM is noisy: try <strong>Moving median</strong> or <strong>Savitzky-Golay</strong> and/or increase the step size.
+<hr>
+
+<h3>DETAILS</h3>
+See the plugin README: <a href="https://github.com/Javisionario/L-RAT/blob/main/README_EN.md#83-slope-and-longitudinal-profile">Slope and Longitudinal Profile</a>

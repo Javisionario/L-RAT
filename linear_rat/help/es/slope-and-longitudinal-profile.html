@@ -1,0 +1,30 @@
+Genera un <strong>perfil longitudinal</strong> y <strong>pendientes (%)</strong> a partir de una capa de líneas (ejes) y un <strong>DEM</strong> (raster local o WCS).
+<hr>
+
+<h3>ENTRADAS</h3>
+&#8226; <strong>Capa de líneas</strong>: eje o ejes a analizar.
+&#8226; <strong>DEM</strong>: raster de elevación (local o WCS).
+&#8226; <strong>Campo ID</strong> (opcional): identificador a conservar en salidas.
+&#8226; <strong>Intervalo de muestreo (m)</strong>: distancia entre muestras. <strong>0</strong> = resolución del DEM. <strong>Recomendado</strong>: mínimo tamaño de píxel ×3.
+&#8226; <strong>Invertir sentido</strong>: cambia el origen del perfil (inicio ↔ fin).
+<hr>
+
+<h3>SALIDAS</h3>
+&#8226; <strong>Tabla</strong> (sin geometría): una fila por muestra con distancia, cota (RAW), cota suavizada, pendiente (%) y <strong>SLOPE_TYPE</strong> (REAL/INTERP/EXTRAP/NODATA).
+Esta tabla puede graficarse de modo sencillo con el algoritmo <strong>Profile Slope Plotter</strong> de L-RAT.
+&#8226; <strong>Capa segmentada</strong> (líneas): micro-tramos entre muestras con atributos de cota y pendiente para salidas gráficas cartográficas.
+<hr>
+
+<h3>OPCIONES AVANZADAS</h3>
+&#8226; <strong>Muestreo del DEM</strong>: Nearest / Bilineal / Cubico.
+&#8226; <strong>Suavizado</strong>: Ninguno / Media móvil / Mediana móvil / Savitzky-Golay (ventana y orden).
+&#8226; <strong>Usar M</strong> (si existe): añade PK a la tabla (km y formato km+mmm).
+<hr>
+
+<h3>CONSEJOS</h3>
+&#8226; Para pendientes coherentes, usa datos en un <strong>CRS proyectado</strong> (metros).
+&#8226; Si el DEM es ruidoso: prueba <strong>Mediana móvil</strong> o <strong>Savitzky-Golay</strong> y/o aumenta el paso.
+<hr>
+
+<h3>DETALLES</h3>
+Consulta el README del plugin: <a href="https://github.com/Javisionario/L-RAT?tab=readme-ov-file#83-slope-and-longitudinal-profile">Slope and Longitudinal Profile</a>

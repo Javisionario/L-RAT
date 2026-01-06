@@ -1,0 +1,33 @@
+Calibra el valor <strong>M</strong> de una capa de líneas en función de la <strong>distancia al origen</strong>.
+
+<hr>
+
+<h3>ENTRADAS</h3>
+    &#8226;  <strong>Capa de líneas</strong> (con o sin M).
+    &#8226;  <strong>Valor inicial de M</strong>: valor del punto de origen (en unidades de salida).
+    &#8226;  <strong>Unidades de los valores de M (salida)</strong>: metros o kilómetros.
+
+<hr>
+
+<h3>OPCIONES</h3>
+    &#8226; <strong>Sobrescribir M existente</strong>: si está desactivado, se omiten features que ya tengan M (<i>warning</i>). 
+    &#8226; <strong>Invertir sentido</strong>: M decrece en el sentido geométrico.
+
+<hr>
+
+<h3>SALIDAS</h3>
+    &#8226; Línea(s) con geometría M y campos: <code>M_START</code>, <code>M_END</code>, <code>LEN_M</code>, <code>STATUS</code>.
+    &#8226; <code>STATUS</code> puede incluir: <code>OK</code>, <code>SKIPPED_HAS_M</code>, <code>ZERO_LENGTH</code>, <code>BAD_GEOMETRY</code>, <code>NO_ROUTE</code>.
+
+La salida conserva los atributos originales.
+<p><b>Nota:</b> Si la geometría de entrada es multipart (MultiLineString), cada parte se procesa por separado y la salida contendrá un feature por parte.</p>
+
+<hr>
+
+<h3>CONSEJO</h3>
+  Para que las distancias sean coherentes, usa un <strong>CRS proyectado</strong> (metros). En un CRS geográfico, usa el modo <i>Auto/Geodesic (avanzado)</i>.
+
+<hr>
+
+<h3>DETALLES</h3>
+  Consulta el README del plugin: <a href="https://github.com/Javisionario/L-RAT?tab=readme-ov-file#42-calibrate-lines-from-distance">Calibrate lines from distance</a>

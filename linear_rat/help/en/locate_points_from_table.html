@@ -1,0 +1,23 @@
+Locate (interpolate) points on a calibrated line layer with M geometry <i>LineStringM</i>/<i>MultiLineStringM</i>, from an events table/layer where each row is a point that can be located using <strong>ROUTE_ID</strong> + <strong>chainage (PK)</strong>.
+<hr>
+
+<h3>INPUTS</h3>
+&#8226; <strong>Calibrated line layer (M)</strong> and its <strong>ROUTE_ID</strong> field
+&#8226; <strong>Events/points table</strong> with fields: <strong>ROUTE_ID</strong>, <strong>chainage (PK)</strong>, and (optional) <strong>PK_ID</strong>
+&#8226; <strong>M units</strong> (m or km)
+&#8226; <strong>Add table fields to output</strong> (optional).
+<hr>
+
+<h3>ADVANCED OPTIONS</h3>
+&#8226; <strong>Tolerance (km)</strong>: helps resolve small mismatches within a calibrated segment (does not fill gaps).
+&#8226; <strong>Snap to the nearest available chainage (PK)</strong>: if the requested chainage value (PK) falls in a gap between segments, it can “snap” to the nearest valid chainage (PK).
+&#8226; <strong>Generate issues table</strong>: logs adjustments and errors per event.
+<hr>
+
+<h3>OUTPUTS</h3>
+&#8226; <strong>Located points</strong> with typical fields: <code>ROUTE_ID</code>, <code>PK_REQ</code>, <code>PK</code>, <code>ADJUSTED</code>, <code>ADJUST_REASON</code>, <code>STATUS</code> (and <code>PK_ID</code> if present).
+&#8226; <strong>Issues (table)</strong> (optional) with <code>WARNINGS</code> and <code>CRITICALS</code> (if any issues occurred).
+<hr>
+
+<h3>DETAILS</h3>
+See the plugin README: <a href="https://github.com/Javisionario/L-RAT/blob/main/README_EN.md#54-locate-points-from-table">Locate points from table</a>.

@@ -1,0 +1,40 @@
+Calibra el valor <strong>M</strong> de una capa de líneas a partir de <strong>eventos puntuales</strong> (PK) almacenados en una capa de puntos.
+Cada punto se proyecta sobre la línea más cercana y se usa como <strong>control de calibración</strong> para interpolar y asignar el campo M a lo largo del eje.
+<hr>
+
+<h3>ENTRADAS</h3>
+&#8226; <strong>Capa de líneas</strong> (con o sin M previo).
+&#8226; <strong>Capa de puntos de referencia (Eventos con PK)</strong>: Puntos con valores de PK conocidos.
+&#8226; <strong>Campo PK</strong> en la capa de puntos (campo que contiene el valor del kilometraje).
+&#8226; <strong>Unidades del PK de entrada</strong>: m, km o <i>Auto</i>.
+&#8226; <strong>Unidades de salida de M</strong>: m o km.
+<hr>
+
+<h3>EMPAREJADO PUNTO–LÍNEA</h3>
+&#8226; Los puntos se proyectan sobre la línea más cercana dentro de la <strong>distancia máxima</strong>.
+&#8226; <strong>Agrupar por ROUTE_I</strong> (opcional): fuerza que los PK solo calibren su vía correspondiente. (Requiere indicar el campo <strong>ROUTE_ID</strong> en puntos y líneas).
+<hr>
+
+<h3>CALIBRACIÓN</h3>
+&#8226; Los PK proyectados actúan como <strong>puntos de control</strong> y M se asigna por interpolación ente puntos de control.
+&#8226; <strong>Comportamiento fuera del rango de puntos de control</strong>: comportamiento cuando las geometría quedan fuera de los puntos de control (Extrapolación / Recortar / NULL).
+&#8226; <strong>Añadir multiplicador</strong> y <strong>Añadir desplazamiento</strong> (avanzado) se aplican sobre el M final (en unidades de salida).
+<hr>
+
+<h3>OPCIONES AVANZADAS</h3>
+&#8226; <strong>Generar puntos proyectados</strong>: capa auxiliar para revisión y control de calidad.
+&#8226; <strong>Generar tabla de incidencias</strong>: solo si existen avisos o errores.
+<hr>
+
+<h3>SALIDAS</h3>
+&#8226; <strong>Líneas calibradas</strong> con geometría <i>LineStringM</i>/<i>MultiLineStringM</i>.
+&#8226; <strong>Puntos proyectados</strong> (opcional)
+&#8226; <strong>Incidencias</strong> (tabla, opcional).
+<hr>
+
+<h3>WARNINGS / ERRORES</h3>
+Se reportan en el log de Processing y, si se activa, en la tabla de incidencias.
+<hr>
+
+<h3>DETALLES</h3>
+Consulta el README del plugin: <a href="https://github.com/Javisionario/L-RAT/blob/main/README.md#43-calibrate-lines-from-pointsevents">Calibrate lines from points (events)</a>

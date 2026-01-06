@@ -1,0 +1,40 @@
+Calibrate the <strong>M</strong> values of a line layer with chainage (PK) values from a <strong>point events</strong>layer.
+Each point is projected onto the nearest line and used as a <strong>calibration control</strong> to interpolate and assign the M value along the axis.
+<hr>
+
+<h3>INPUTS</h3>
+&#8226; <strong>Line layer</strong> (with or without existing M).
+&#8226; <strong>Reference point layer</strong> (events).
+&#8226; <strong>Chainage (PK) field</strong> in the point layer (PK).
+&#8226; <strong>Chainage (PK) units</strong>: m, km, or <i>Auto</i>.
+&#8226; <strong>M output units</strong>: m or km.
+<hr>
+
+<h3>POINT–LINE MATCHING</h3>
+&#8226; Points are projected onto the nearest line within the <strong>maximum distance</strong>.
+&#8226; <strong>Group by ROUTE_ID</strong> (optional): forces PK events to calibrate only their corresponding road/route. (Requires specifying the <strong>ROUTE_ID</strong> field in both points and lines).
+<hr>
+
+<h3>CALIBRATION</h3>
+&#8226; Projected events (PK) act as <strong>control points</strong>, and M is assigned by interpolation between control points.
+&#8226; <strong>Behavior outside control range</strong>: choose the mode (Extrapolate / Clip / Flat / NULL).
+&#8226; <strong>Factor</strong> and <strong>Offset</strong> (advanced) are applied to the final M (in output units).
+<hr>
+
+<h3>ADVANCED OPTIONS</h3>
+&#8226; <strong>Generate projected points</strong>: auxiliary layer for review and quality control.
+&#8226; <strong>Generate issues table</strong>: only if warnings or errors exist.
+<hr>
+
+<h3>OUTPUTS</h3>
+&#8226; <strong>Calibrated lines</strong> with <i>LineStringM</i>/<i>MultiLineStringM</i> geometry.
+&#8226; <strong>Projected points</strong> (optional).
+&#8226; <strong>Issues</strong> (table, optional).
+<hr>
+
+<h3>WARNINGS / ERRORS</h3>
+Reported in the Processing log and, if enabled, in the issues table.
+<hr>
+
+<h3>DETAILS</h3>
+See the plugin README: <a href="https://github.com/Javisionario/L-RAT/blob/main/README_EN.md#43-calibrate-lines-from-pointsevents">Calibrate lines from points/events</a>

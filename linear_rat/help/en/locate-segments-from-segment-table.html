@@ -1,0 +1,29 @@
+Extract <strong>a single segment</strong> from a <strong>calibrated</strong> line layer with M geometry <i>LineStringM</i>/<i>MultiLineStringM</i>, from a table where each row defines a segment using <strong>ROUTE_ID</strong> + <strong>chainage (PK)</strong> ('PK_START' + 'PK_END).
+<hr>
+
+<h3>INPUTS</h3>
+&#8226; <strong>Calibrated line layer (M)</strong> and its <strong>ROUTE_ID</strong> field
+&#8226; <strong>Segments table</strong> with fields: <strong>ROUTE_ID</strong>, <strong>Start chainage (PK)</strong>, <strong>End chainage (PK)</strong>, and (optional) <strong>EVENT_ID</strong>
+&#8226; <strong>M units</strong> (m or km)
+&#8226; <strong>Segment</strong>: Chainage (PK) values + ROUTE_ID value
+<hr>
+
+<h3>OPTIONS</h3>
+&#8226; <strong>Add table fields to output</strong> (optional).
+&#8226; <strong>Generate endpoint points</strong> (optional).
+<hr>
+
+<h3>ADVANCED OPTIONS</h3>
+&#8226; <strong>Tolerance (km)</strong>: helps resolve small mismatches within a calibrated segment (does not fill gaps).
+&#8226; <strong>Snap to the nearest available chainage (PK) point</strong>: if an endpoint falls in a gap, it can be adjusted to the nearest valid chainage (PK) point.
+&#8226; <strong>Generate issues table</strong>: logs adjustments/warnings/errors per segment.
+<hr>
+
+<h3>OUTPUTS</h3>
+&#8226; <strong>Extracted segments</strong> with typical fields: <code>ROUTE_ID</code>, <code>EVENT_ID</code> (if present), <code>PK_INI</code>, <code>PK_FIN</code>, <code>DIST_PK_KM</code>, <code>DIST_GEOM_KM</code>, <code>ADJUSTED</code>, <code>ADJUST_REASON</code>, <code>N_PIECES</code>, <code>STATUS</code>.
+&#8226; <strong>Endpoint points</strong> (optional) with <code>PK_REQ</code>, <code>PK</code>, <code>ADJUSTED</code>, <code>ADJUST_REASON</code>.
+&#8226; <strong>Issues (table)</strong> (optional) with <code>WARNINGS</code> (e.g. <code>{self.WARN_SEGMENT_SPLIT}</code>) and <code>CRITICALS</code>.
+<hr>
+
+<h3>DETAILS</h3>
+See the plugin README: <a href="https://github.com/Javisionario/L-RAT/blob/main/README_EN.md#65-locate-segments-from-segment-table">Locate segments from segment table</a>.

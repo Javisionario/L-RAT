@@ -1,0 +1,22 @@
+Locate (interpolate) <strong>1 or 2 points</strong> on a <strong>calibrated</strong> line layer with M geometry <i>LineStringM</i>/<i>MultiLineStringM</i>, from manually entered <strong>ROUTE_ID + chainage (PK)</strong>.
+<hr>
+
+<h3>INPUTS</h3>
+&#8226; <strong>Calibrated line layer (M)</strong> and its <strong>ROUTE_ID</strong> field
+&#8226; <strong>M units</strong>: (m or km)
+&#8226; <strong>Point</strong>: Chainage (PK) value + ROUTE_ID value
+<hr>
+
+<h3>ADVANCED OPTIONS</h3>
+&#8226; <strong>Tolerance (km)</strong>: helps resolve small mismatches within a calibrated segment (does not fill gaps).
+&#8226; <strong>Snap to the nearest available chainage (PK) point</strong>: if the requested chainage (PK) falls in a gap between segments, it can “snap” to the nearest valid chainage (PK).
+&#8226; <strong>Generate issues table</strong>: logs adjustments and errors per event.
+<hr>
+
+<h3>OUTPUTS</h3>
+&#8226; <strong>Located points</strong> with typical fields: <code>PK_REQ</code>, <code>PK</code>, <code>ADJUSTED</code>, <code>ADJUST_REASON</code>, <code>STATUS</code>.
+&#8226; <strong>Issues (table)</strong> (optional) with <code>WARNINGS</code> and <code>CRITICALS</code> (if any issues occurred).
+<hr>
+
+<h3>DETAILS</h3>
+See the plugin README: <a href="https://github.com/Javisionario/L-RAT/blob/main/README_EN.md#53-locate-points">Locate points</a>.

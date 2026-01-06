@@ -1,0 +1,43 @@
+Modifica los valores <strong>M</strong> existentes en una capa <i>LineStringM</i>/<i>MultiLineStringM</i> mediante operaciones típicas de recalibración. No cambia X/Y (ni Z); solo reescribe <strong>M</strong> en los vértices.
+<hr>
+
+<h3>ENTRADAS</h3>
+&#8226; <strong>Capa de líneas con M</strong> (LineStringM/MultiLineStringM).
+<hr>
+
+<h3>OPERACIONES</h3>
+&#8226; <strong>Desplazamiento</strong>: desplaza todos los M una cantidad constante (corrección de desfase).
+&#8226; <strong>Factor</strong>: escala todos los M (conversión de unidades o recalibración).
+&#8226; <strong>Invertir M</strong>: invierte el sentido de M manteniendo el rango (por feature o por ruta según el ámbito).
+&#8226; <strong>Establecer M inicial (TARGET_START)</strong>: ajusta el origen para que el primer vértice tenga el M indicado, manteniendo el resto consistente.
+&nbsp;&nbsp;    ↳ En ámbito por ROUTE_ID, el origen se calcula de forma común para todos los features de la ruta.
+&#8226; <strong>Recortar (Clamp) M al rango</strong>: limita M a un intervalo mínimo/máximo; si un valor queda fuera, se ajusta al límite. Es decir, limpia valores <strong>fuera de rango</strong> sin recalibrar el eje, por lo que el <strong>interior permanece intacto</strong>. No comprime ni estira la calibración (no “remapea”).
+&nbsp;&nbsp;        ↳ Solo afecta a valores por debajo de <code>min</code> o por encima de <code>max</code>, fijándolos al límite.
+&nbsp;&nbsp;        ↳ Puede crear tramos <strong>planos</strong> al inicio o al final (valores pegados a <code>min</code>/<code>max</code>).
+&#8226; <strong>Forzar monotonía</strong> <i>(limpieza de “rebotes”)</i>: corrige inversiones locales de M para que evolucione siempre en el mismo sentido; puede “aplanar” pequeños tramos.
+La <strong>tolerancia (epsilon)</strong> permite ignorar pequeñas variaciones numéricas antes de corregir.
+<hr>
+
+<h3>VALIDACIÓN</h3>
+&#8226; <strong>Requerir M</strong> (avanzado): si está activo, las features sin M generan <i>critical</i>.
+Si está desactivado, se omiten con <i>warning</i> (<code>SKIPPED_NO_M</code>).
+<hr>
+
+<h3>ÁMBITO (AVANZADO)</h3>
+&#8226; <strong>Por feature</strong>: aplica las operaciones usando el rango/origen de cada feature.
+&#8226; <strong>Por ROUTE_ID</strong>: usa un rango/origen común para varias features (útil si una ruta está partida).
+&nbsp;&nbsp;↳ Requiere indicar el campo <strong>ROUTE_ID</strong>.
+<hr>
+
+<h3>SALIDAS</h3>
+&#8226; Capa de líneas con <strong>M modificado</strong>.
+&#8226; Añade el campo <code>STATUS</code> (p.ej. <code>OK</code>, <code>SKIPPED_NO_M</code>, <code>NO_M_VALUES</code>, <code>BAD_GEOMETRY</code>, <code>NO_ROUTE</code>).
+&#8226; El log de Processing incluye <strong>warnings</strong> y <strong>criticals</strong> (p.ej. <code>CLAMP_APPLIED</code>, <code>MONO_APPLIED</code>).
+<hr>
+
+<h3>CONSEJO</h3>
+Si usas <strong>Invertir</strong> o <strong>Fijar origen</strong> en rutas partidas, considera el ámbito <strong>Por ROUTE_ID</strong> para mantener coherencia global.
+<hr>
+
+<h3>DETALLES</h3>
+Consulta el README del plugin: <a href="https://github.com/Javisionario/L-RAT/blob/main/README.md#45-edit-calibration-Modify-M-values">Edit calibration (Modify M values)</a>

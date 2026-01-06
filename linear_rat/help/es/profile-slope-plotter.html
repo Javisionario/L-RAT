@@ -1,0 +1,31 @@
+Genera, a partir de una <strong>tabla/dataset</strong>, los gráficos de:
+&nbsp;&nbsp;&#8226; <strong>Perfil longitudinal</strong>
+&nbsp;&nbsp;&#8226; <strong>Perfil + pendiente (%)</strong>
+
+Está <strong>diseñado específicamente</strong> para graficar las tablas generadas por el algoritmo <strong>«Slope and Longitudinal Profile»</strong> de este mismo propio plugin, aunque puede usarse con cualquier tabla compatible.
+
+El perfil siempre se representa contra la <strong>distancia real en metros</strong> (<strong>Dist_Origen_metros</strong>), pero permite elegir cómo <strong>etiquetar el eje X</strong>:
+&nbsp;&nbsp;&#8226; <strong>PK (K+MMM)</strong> usando <strong>m_field_PK_KM</strong> (si hay valores faltantes, se <strong>interpolan/extrapolan</strong> para mantener marcas coherentes).
+&nbsp;&nbsp;&#8226; <strong>Distancia</strong> usando <strong>Dist_Origen_metros</strong> (etiquetado en metros o km con intervalos lógicos).
+
+Se genera <strong>un par de gráficos por cada ID</strong>.
+<hr>
+
+<h3>ENTRADAS</h3>
+&#8226; <strong>Tabla/capa de entrada</strong>: dataset sin geometría (o capa) con distancia, cota y pendiente, normalmente <strong>salida directa del algoritmo «Slope and Longitudinal Profile»</strong>.
+&#8226; <strong>Campo ID</strong> (opcional): identificador para separar perfiles y generar <strong>un gráfico por ID</strong>.
+&#8226; <strong>Campo X</strong>: distancia desde el origen (<strong>m</strong>).
+&#8226; <strong>Campo Y</strong>: cota del perfil (p. ej. <strong>Cota_SUAV</strong>).
+&#8226; <strong>Campo pendiente</strong> (opcional): pendiente en <strong>%</strong>.
+&#8226; <strong>Usar PK en el eje X</strong> (opcional): etiqueta el eje X como PK si existe el campo correspondiente.
+&#8226; <strong>Campo PK</strong> (opcional): PK en <strong>km</strong> (float). Si hay valores faltantes, se <strong>interpolan/extrapolan</strong> para generar marcas coherentes.
+&#8226; <strong>Mostrar etiquetas de ejes</strong> (opcional): si se activa, se muestran títulos y nombres de ejes (traducibles). Si se desactiva, no se muestran etiquetas ni títulos (los ticks conservan unidades).
+<hr>
+
+<h3>SALIDAS</h3>
+&#8226; <strong>Carpeta</strong>: contiene los PNG generados por ID (<strong>perfil</strong> y <strong>perfil + pendiente</strong>).
+&#8226; <strong>HTML Report</strong>: informe con vista previa y enlaces a todos los gráficos generados. Check Processing Toolbox > Results Viewer
+<hr>
+
+<h3>DETALLES</h3>
+Consulta el README del plugin: <a href="https://github.com/Javisionario/L-RAT?tab=readme-ov-file#82-profile-slope-plotter">Profile Slope Plotter</a>

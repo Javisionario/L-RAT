@@ -1,0 +1,38 @@
+Assigns a <strong>chainage</strong> value (PK) to each point from the <strong>interpolated M</strong> value by its projection onto a <strong>calibrated</strong> line layer with M geometry (<i>LineStringM</i>/<i>MultiLineStringM</i>).
+<i>Note:</i> it does not modify the point geometry; it adds calibration fields to the attributes.
+<hr>
+
+<h3>INPUTS</h3>
+&#8226; <strong>Point layer</strong> to calibrate.
+&#8226; <strong>Calibrated line layer (M)</strong> (axis/road centerline).
+&#8226; <strong>M units</strong> (m or km).
+&#8226; <strong>Maximum distance</strong>: threshold to accept the match (search/projection).
+<hr>
+
+<h3>OPTIONS</h3>
+&#8226; <strong>Restrict matching by ROUTE_ID</strong>: searches only within the point’s route (recommended if there are parallel axes).
+&nbsp;&nbsp;↳ Requires specifying the ROUTE_ID field in both <strong>points</strong> and <strong>lines</strong>.
+&#8226; <strong>Add ROUTE_ID to output</strong>: copies the ROUTE_ID from the matched line.
+&nbsp;&nbsp;↳ Requires specifying the ROUTE_ID field in the <strong>line layer</strong>.
+<hr>
+
+<h3>OUTPUTS</h3>
+&#8226; <strong>Calibrated points</strong> with new fields:
+&nbsp;&nbsp;– <code>PK</code>: formatted chainage (km+mmm).
+&nbsp;&nbsp;– <code>M</code>: interpolated M value (in the units stored in the geometry).
+&nbsp;&nbsp;– <code>DIST_AXIS</code>: distance from the point to the axis (in CRS units).
+&nbsp;&nbsp;– <code>INCIDENCE</code>: 0/1 (1 if calibration failed).
+&nbsp;&nbsp;– <code>INC_TYPE</code>: reason when <code>INCIDENCE=1</code>.
+&#8226; <strong>Issues (table)</strong> (optional): <strong>disabled</strong> by default; created only if enabled and issues exist.
+<hr>
+
+<h3>ISSUES (INC_TYPE)</h3>
+&#8226; <code>INC_BAD_GEOM</code>: empty/invalid/non-point geometry.
+&#8226; <code>INC_NO_ROUTE</code>: missing or not found ROUTE_ID (when restricting by route).
+&#8226; <code>INC_NO_M</code>: no segments with usable M values among candidates/on the route.
+&#8226; <code>INC_TOO_FAR</code>: a projection with M exists, but the distance exceeds the maximum.
+&#8226; <code>INC_NO_MATCH</code>: could not obtain a valid projection with M.
+<hr>
+
+<h3>DETAILS</h3>
+See the plugin README: <a href="https://github.com/Javisionario/L-RAT/blob/main/README_EN.md#44-calibrate-points">Calibrate points</a>

@@ -1,0 +1,43 @@
+Modify existing <strong>M</strong> values in a <i>LineStringM</i>/<i>MultiLineStringM</i> layer using common recalibration operations. It does not change X/Y (or Z); it only rewrites <strong>M</strong> at vertices.
+<hr>
+
+<h3>INPUTS</h3>
+&#8226; <strong>Line layer with M</strong> (LineStringM/MultiLineStringM).
+<hr>
+
+<h3>OPERATIONS</h3>
+&#8226; <strong>Offset</strong>: shifts all M values by a constant amount (offset correction).
+&#8226; <strong>Factor</strong>: scales all M values (unit conversion or recalibration).
+&#8226; <strong>Invert M</strong>: reverses the M direction while keeping the same range (per feature or per route depending on scope).
+&#8226; <strong>Set origin (TARGET_START)</strong>: adjusts the origin so the first vertex has the specified M, keeping the rest consistent.
+&nbsp;&nbsp;    ↳ In ROUTE_ID scope, the origin is computed in a common way for all features in the route.
+&#8226; <strong>Clamp M to range</strong>: limits M to a minimum/maximum interval; values outside are set to the nearest bound. In other words, it cleans <strong>out-of-range</strong> values without recalibrating the axis, so the <strong>interior remains intact</strong>. It does not compress or stretch calibration (no “remapping”).
+&nbsp;&nbsp;        ↳ Only affects values below <code>min</code> or above <code>max</code>, snapping them to the bound.
+&nbsp;&nbsp;        ↳ It may create <strong>flat</strong> sections at the start or end (values stuck at <code>min</code>/<code>max</code>).
+&#8226; <strong>Enforce monotonicity</strong> <i>(“bounce” cleanup)</i>: fixes local inversions of M so it always progresses in the same direction; it may “flatten” small segments.
+The <strong>tolerance (epsilon)</strong> allows ignoring small numerical variations before correcting.
+<hr>
+
+<h3>VALIDATION</h3>
+&#8226; <strong>Require M</strong> (advanced): if enabled, features without M produce <i>critical</i> messages.
+If disabled, they are skipped with a <i>warning</i> (<code>SKIPPED_NO_M</code>).
+<hr>
+
+<h3>SCOPE (ADVANCED)</h3>
+&#8226; <strong>Per feature</strong>: applies operations using each feature’s own range/origin.
+&#8226; <strong>By ROUTE_ID</strong>: uses a shared range/origin across multiple features (useful when a route is split).
+&nbsp;&nbsp;↳ Requires specifying the <strong>ROUTE_ID</strong> field.
+<hr>
+
+<h3>OUTPUTS</h3>
+&#8226; Line layer with <strong>modified M</strong>.
+&#8226; Adds the <code>STATUS</code> field (e.g. <code>OK</code>, <code>SKIPPED_NO_M</code>, <code>NO_M_VALUES</code>, <code>BAD_GEOMETRY</code>, <code>NO_ROUTE</code>).
+&#8226; The Processing log includes <strong>warnings</strong> and <strong>criticals</strong> (e.g. <code>CLAMP_APPLIED</code>, <code>MONO_APPLIED</code>).
+<hr>
+
+<h3>TIP</h3>
+If you use <strong>Invert</strong> or <strong>Set origin</strong> on split routes, consider the <strong>By ROUTE_ID</strong> scope to keep global consistency.
+<hr>
+
+<h3>DETAILS</h3>
+See the plugin README: <a href="https://github.com/Javisionario/L-RAT/blob/main/README_EN.md#45-edit-calibration-Modify-M-values">Edit calibration (Modify M values)</a>

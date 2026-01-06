@@ -1,0 +1,21 @@
+Detect <strong>curve segments</strong> in a line layer, estimate their <strong>radius of curvature</strong>, and generate a curves layer. Optionally, compute curvature centers and group them by distance (clusters) to generate a centroid layer.
+<hr>
+
+<h3>INPUTS</h3>
+&#8226; <strong>Input line layer</strong> (recommended: projected CRS in meters)
+<hr>
+
+<h3>PARAMETERS</h3>
+&#8226; <strong>Densification interval</strong>: controls the level of detail (smaller = more detail and higher cost).
+&#8226; <strong>Minimum / maximum radius</strong>: filters curves that are too tight or too flat.
+&#8226; <strong>Minimum distance between vertices</strong>: avoids unstable calculations with very close points.
+&#8226; <strong>Generate centers layer</strong> (optional) + <strong>clustering distance</strong>.
+<hr>
+
+<h3>OUTPUTS</h3>
+&#8226; <strong>Curve segments layer</strong> with: <code>ID_Curva</code>, <code>ID_Centroide</code>, <code>Radio</code>, <code>Longitud</code>.
+&#8226; <strong>Centroids layer</strong> (optional) with: <code>ID_Centroide</code>, <code>Radio_medio</code>, <code>Conteo</code>.
+<hr>
+
+<h3>DETAILS</h3>
+See the plugin README: <a href="https://github.com/Javisionario/L-RAT/blob/main/README_EN.md#71-curve-detection-and-curvature-centers">Curve Detection and Curvature Centers</a>.

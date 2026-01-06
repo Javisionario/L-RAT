@@ -1,0 +1,32 @@
+Generate, from a <strong>table/dataset</strong>, the following plots:
+&nbsp;&nbsp;&#8226; <strong>Longitudinal profile</strong>
+&nbsp;&nbsp;&#8226; <strong>Profile + slope (%)</strong>
+
+It is <strong>specifically designed</strong> to plot tables produced by the plugin’s own <strong>“Slope and Longitudinal Profile”</strong> algorithm, although it can be used with any compatible table.
+
+The profile is always plotted against the <strong>real distance in meters</strong> (<strong>Dist_Origen_metros</strong>), but it lets user choose how to <strong>label the X axis</strong>:
+&nbsp;&nbsp;&#8226; <strong>Chainage (PK) (K+MMM)</strong> using <strong>m_field_PK_KM</strong> (if values are missing, they are <strong>interpolated/extrapolated</strong> to keep coherent tick marks).
+&nbsp;&nbsp;&#8226; <strong>Distance</strong> using <strong>Dist_Origen_metros</strong> (labels in meters or km with sensible intervals).
+
+A <strong>pair of plots is generated for each ID</strong>.
+<hr>
+
+<h3>INPUTS</h3>
+&#8226; <strong>Input table/layer</strong>: non-spatial dataset (or layer) with distance, elevation, and slope, typically the <strong>direct output of the “Slope and Longitudinal Profile” algorithm</strong>.
+&#8226; <strong>ID field</strong> (optional): identifier to split profiles and generate <strong>one plot per ID</strong>.
+&#8226; <strong>X field</strong>: distance from origin (<strong>m</strong>).
+&#8226; <strong>Y field</strong>: profile elevation (e.g. <strong>Cota_SUAV</strong>).
+&#8226; <strong>Slope field</strong> (optional): slope in <strong>%</strong>.
+&#8226; <strong>Use chainage (PK)</strong> (optional): labels the X axis as chainage values (PK) if the corresponding field exists.
+&#8226; <strong>Chainage (PK) field</strong> (optional): PK in <strong>km</strong> (float). If values are missing, they are <strong>interpolated/extrapolated</strong> to generate coherent tick marks.
+&#8226; <strong>Show axis labels</strong> (optional): if enabled, axis titles and names are displayed (translatable). If disabled, no titles or labels are shown (ticks keep units).
+<hr>
+
+<h3>OUTPUTS</h3>
+&#8226; <strong>Folder</strong>: contains the PNGs generated per ID (<strong>profile</strong> and <strong>profile + slope</strong>).
+&#8226; <strong>HTML (index)</strong>: report with previews and links to all generated plots.
+Check Processing Toolbox > Results Viewer
+<hr>
+
+<h3>DETAILS</h3>
+See the plugin README: <a href="https://github.com/Javisionario/L-RAT/blob/main/README_EN.md#82-profile-slope-plotter">Profile Slope Plotter</a>

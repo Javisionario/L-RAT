@@ -1,0 +1,28 @@
+Extract <strong>1 or 2 segments</strong> from a <strong>calibrated</strong> line layer with M geometry <i>LineStringM</i>/<i>MultiLineStringM</i>, from manually entered <strong>ROUTE_ID</strong> + <strong>chainage (PK)</strong> (<code>PK_INI</code> + <code>PK_FIN</code>).
+<hr>
+
+<h3>INPUTS</h3>
+&#8226; <strong>Calibrated line layer (M)</strong> and its <strong>ROUTE_ID</strong> field
+&#8226; <strong>M field units</strong> (m or km)
+&#8226; <strong>Start/end chainage (PK)</strong> (format <code>km+mmm</code> or a decimal number in km)
+&#8226; <strong>Segment route identifier</strong>
+<hr>
+
+<h3>OPTIONS</h3>
+&#8226; <strong>Generate endpoint points</strong> (optional): creates 2 points per segment (start/end) with <code>PK_REQ</code> vs the actual <code>PK</code>.
+<hr>
+
+<h3>ADVANCED OPTIONS</h3>
+&#8226; <strong>Tolerance (km)</strong>: helps resolve small mismatches within a calibrated segment (does not fill gaps).
+&#8226; <strong>Snap to the nearest available chainage point (PK)</strong>: if an endpoint falls in a gap, it can be adjusted to the nearest valid chainage point (PK).
+&#8226; <strong>Generate issues table</strong>: logs adjustments/warnings/errors per segment.
+<hr>
+
+<h3>OUTPUTS</h3>
+&#8226; <strong>Extracted segments</strong> with typical fields: <code>PK_INI</code>, <code>PK_FIN</code>, <code>DIST_PK_KM</code>, <code>DIST_GEOM_KM</code>, <code>ADJUSTED</code>, <code>ADJUST_REASON</code>, <code>N_PIECES</code>, <code>STATUS</code>.
+&#8226; <strong>Endpoint points</strong> (optional) with <code>PK_REQ</code>, <code>PK</code>, <code>ADJUSTED</code>, <code>ADJUST_REASON</code>.
+&#8226; <strong>Issues (table)</strong> (optional) with <code>WARNINGS</code> (e.g. <code>{self.WARN_SEGMENT_SPLIT}</code>) and <code>CRITICALS</code>.
+<hr>
+
+<h3>DETAILS</h3>
+See the plugin README: <a href="https://github.com/Javisionario/L-RAT/blob/main/README_EN.md#63-locate-segments">Locate segments</a>.

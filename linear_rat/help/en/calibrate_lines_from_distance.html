@@ -1,0 +1,34 @@
+Calibrate the <strong>M</strong> value of a line layer based on the <strong>distance from the origin</strong>.
+
+<hr>
+
+<h3>INPUTS</h3>
+    &#8226;  <strong>Line layer</strong> (with or without M).
+    &#8226;  <strong>Start M value</strong>: initial value (in output units).
+    &#8226;  <strong>Output M units</strong>: meters or kilometers.
+
+<hr>
+
+<h3>OPTIONS</h3>
+    &#8226; <strong>Overwrite existing M values</strong>: if disabled, features that already have M are skipped (<i>warning</i>). 
+    &#8226; <strong>Reverse direction</strong>: M decreases along the geometric direction.
+
+<hr>
+
+<h3>OUTPUTS</h3>
+    &#8226; Line(s) with M geometry and fields: <code>M_START</code>, <code>M_END</code>, <code>LEN_M</code>, <code>STATUS</code>.
+    &#8226; <code>STATUS</code> may include: <code>OK</code>, <code>SKIPPED_HAS_M</code>, <code>ZERO_LENGTH</code>, <code>BAD_GEOMETRY</code>, <code>NO_ROUTE</code>.
+
+The output preserves the original attributes.
+<p><b>Note:</b> If the input geometry is multipart (MultiLineString), each part is processed separately and the output will contain one feature per part.</p>
+
+
+<hr>
+
+<h3>TIP</h3>
+  For consistent distances, use a <strong>projected CRS</strong> (meters). In a geographic CRS, use <i>Auto/Geodesic (advanced)</i> mode.
+
+<hr>
+
+<h3>DETAILS</h3>
+  See the plugin README: <a href="https://github.com/Javisionario/L-RAT/blob/main/README_EN.md#42-calibrate-lines-from-distance">Calibrate lines from distance</a>

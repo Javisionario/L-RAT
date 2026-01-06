@@ -1,0 +1,28 @@
+Extrae <strong>1 o 2 segmentos</strong> sobre una capa lineal <strong>calibrada</strong> con geometría M <i>LineStringM</i>/<i>MultiLineStringM</i>, a partir de <strong>ROUTE_ID + PK_INI + PK_FIN</strong> introducidos manualmente.
+<hr>
+
+<h3>ENTRADAS</h3>
+&#8226; <strong>Capa de líneas calibrada (M)</strong> y su campo <strong>ROUTE_ID</strong>
+&#8226; <strong>Unidades del campo M</strong> (m o km)
+&#8226; <strong>PK inicio/fin</strong> (formato <code>km+mmm</code> o número decimal en km)
+&#8226; <strong>Identificador de ruta</strong>
+<hr>
+
+<h3>OPCIONES</h3>
+&#8226; <strong>Generar puntos de extremos</strong> (opcional): crea 2 puntos por segmento (inicio/fin) con <code>PK_REQ</code> vs <code>PK</code> real.
+<hr>
+
+<h3>OPCIONES AVANZADAS</h3>
+&#8226; <strong>Tolerancia (km)</strong>: ayuda a resolver pequeños desajustes dentro de un tramo calibrado (no rellena huecos).
+&#8226; <strong>Ajustar al PK disponible más cercano</strong>: si un extremo cae en un hueco, puede ajustarse al PK válido más cercano.
+&#8226; <strong>Generar tabla de incidencias</strong>: registra ajustes/avisos/errores por segmento.
+<hr>
+
+<h3>SALIDAS</h3>
+&#8226; <strong>Segmentos extraídos</strong> con campos típicos: <code>PK_INI</code>, <code>PK_FIN</code>, <code>DIST_PK_KM</code>, <code>DIST_GEOM_KM</code>, <code>ADJUSTED</code>, <code>ADJUST_REASON</code>, <code>N_PIECES</code>, <code>STATUS</code>.
+&#8226; <strong>Puntos extremos</strong> (opcional) con <code>PK_REQ</code>, <code>PK</code>, <code>ADJUSTED</code>, <code>ADJUST_REASON</code>.
+&#8226; <strong>Incidencias (tabla)</strong> (opcional) con <code>WARNINGS</code> (p.ej. <code>{self.WARN_SEGMENT_SPLIT}</code>) y <code>CRITICALS</code>.
+<hr>
+
+<h3>DETALLES</h3>
+Consulta el README del plugin: <a href="https://github.com/Javisionario/L-RAT?tab=readme-ov-file#63-locate-segments">Locate segments</a>.

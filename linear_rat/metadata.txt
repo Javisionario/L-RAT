@@ -1,0 +1,15 @@
+[general]
+name=L-RAT: Linear Referencing & Analysis Tools
+qgisMinimumVersion=3.10
+description=Processing algorithms for linear referencing (PK/M) and analysis on linear layers, especially road networks. Includes tools to locate points and segments on calibrated LineStringM geometries, as well as additional utilities for linear infrastructure analysis.
+version=1.0
+author=Javi H Piris
+email=pirishj@gmail.com
+about=This Processing plugin adds a set of practical tools to the QGIS Processing Toolbox for working with linear features, especially in road and linear infrastructure projects. L-RAT focuses on linear referencing using PK/M values on calibrated LineStringM and MultiLineStringM geometries, allowing users to locate points and extract segments along linear networks, either manually or from attribute tables. The plugin also includes additional utilities for analysing linear data that do not require M geometry but are commonly needed in road engineering workflows such as curve/center detection and slope & longitudinal profile extraction from a DEM.
+category=Processing
+homepage=https://github.com/Javisionario/L-RAT
+tracker=https://github.com/Javisionario/L-RAT
+repository=https://github.com/Javisionario/L-RAT
+tags=linear,referencing,analysis,pk,m,linestringm,road,linestring,viario,segment,events,calibration,chainage,profile,points along lines,DEM,elevation,
+icon=icon.png
+hasProcessingProvider=yes

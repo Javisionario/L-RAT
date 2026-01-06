@@ -1,0 +1,38 @@
+Asigna a cada punto un <strong>PK</strong> (formato km+mmm) y un valor <strong>M</strong> interpolado, proyectando el punto sobre una capa lineal <strong>calibrada</strong> con geometría M (<i>LineStringM</i>/<i>MultiLineStringM</i>).
+<i>Nota:</i> no modifica la geometría del punto; añade campos de calibración en atributos.
+<hr>
+
+<h3>ENTRADAS</h3><
+&#8226; <strong>Capa de puntos</strong> a calibrar.
+&#8226; <strong>Capa de líneas calibrada (M)</strong> (eje/viario).
+&#8226; <strong>Unidades de los valores de M</strong> (m o km).
+&#8226; <strong>Distancia de búsqueda/proyección máxima</strong>: umbral para aceptar el emparejado (búsqueda/proyección).
+<hr>
+
+<h3>OPCIONES</h3>
+&#8226; <strong>Restringir emparejado por ROUTE_ID</strong>: busca solo en la vía del punto (recomendado si hay ejes paralelos).
+&nbsp;&nbsp;↳ Requiere indicar el campo ROUTE_ID tanto en <strong>puntos</strong> como en <strong>líneas</strong>.
+&#8226; <strong>Añadir ROUTE_ID a la salida</strong>: copia el ROUTE_ID de la línea emparejada.
+&nbsp;&nbsp;↳ Requiere indicar el campo ROUTE_ID en la <strong>capa de líneas</strong>.
+<hr>
+
+<h3>SALIDAS</h3>
+&#8226; <strong>Puntos calibrados</strong> con nuevos campos:
+&nbsp;&nbsp;– <code>PK</code>: PK formateado (km+mmm).
+&nbsp;&nbsp;– <code>M</code>: valor M interpolado (en las unidades almacenadas en la geometría).
+&nbsp;&nbsp;– <code>DIST_AXIS</code>: distancia del punto al eje (en unidades del CRS).
+&nbsp;&nbsp;– <code>INCIDENCE</code>: 0/1 (1 si no se pudo calibrar).
+&nbsp;&nbsp;– <code>INC_TYPE</code>: motivo si <code>INCIDENCE=1</code>.
+&#8226; <strong>Incidencias (tabla)</strong> (opcional): por defecto <strong>desactivada</strong>; solo se crea si se activa y existen incidencias.
+<hr>
+
+<h3>INCIDENCIAS (INC_TYPE)</h3>
+&#8226; <code>INC_BAD_GEOM</code>: geometría vacía/no válida/no puntual.
+&#8226; <code>INC_NO_ROUTE</code>: ROUTE_ID ausente o no encontrado (si se restringe por ruta).
+&#8226; <code>INC_NO_M</code>: no hay segmentos con valores M utilizables en los candidatos/ruta.
+&#8226; <code>INC_TOO_FAR</code>: existe proyección con M, pero la distancia supera la máxima.
+&#8226; <code>INC_NO_MATCH</code>: no se pudo obtener una proyección válida con M.
+<hr>
+
+<h3>DETALLES</h3>
+Consulta el README del plugin: <a href="https://github.com/Javisionario/L-RAT?tab=readme-ov-file#44-calibrate-points">Calibrate points</a>

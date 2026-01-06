@@ -1,0 +1,36 @@
+Generate segments from a table where <strong>each row provides a chainage (PK) point</strong>, associated with <strong>ROUTE_ID</strong> and <strong>PAIR_ID</strong> (pairing identifier).
+<hr>
+
+<h3>HOW IT WORKS</h3>
+For each (<strong>ROUTE_ID</strong>, <strong>PAIR_ID</strong>):
+&#8226; Sort chainage (PK) points numerically.
+&#8226; Pair sequentially: (0–1), (2–3), (4–5)...
+&#8226; If one chainage (PK) point is left unpaired, it is ignored and the warning <code>{self.WARN_ODD_PK_IGNORED}</code> is logged.
+<hr>
+
+<h3>INPUTS</h3>
+&#8226; <strong>Calibrated line layer (M)</strong> and its <strong>ROUTE_ID</strong> field
+&#8226; <strong>Events (PK) table</strong> with fields: <strong>ROUTE_ID</strong>, <strong>PAIR_ID</strong>, <strong>Chainage (PK)</strong>
+&#8226; <strong>M units</strong> (m or km)
+&#8226; <strong>Segment</strong>: Chainage (PK) value + ROUTE_ID value + PAIR_ID value
+<hr>
+
+<h3>OPTIONS</h3>
+&#8226; <strong>Add table fields to output</strong> (optional).
+&#8226; <strong>Generate endpoint points</strong> (optional).
+<hr>
+
+<h3>ADVANCED OPTIONS</h3>
+&#8226; <strong>Tolerance (km)</strong>: helps resolve small mismatches within a calibrated segment (does not fill gaps).
+&#8226; <strong>Snap to the nearest available chainage (PK) point</strong>: if an endpoint falls in a gap, it can be adjusted to the nearest valid chainage point (PK).
+&#8226; <strong>Generate issues table</strong>: logs adjustments/warnings/errors per segment.
+<hr>
+
+<h3>OUTPUTS</h3>
+&#8226; <strong>Extracted segments</strong> with typical fields: <code>ROUTE_ID</code>, <code>PAIR_ID</code>, <code>PK_INI</code>, <code>PK_FIN</code>, <code>DIST_PK_KM</code>, <code>DIST_GEOM_KM</code>, <code>ADJUSTED</code>, <code>ADJUST_REASON</code>, <code>N_PIECES</code>, <code>STATUS</code>.
+&#8226; <strong>Endpoint points</strong> (optional) with <code>PK_REQ</code>, <code>PK</code>, <code>ADJUSTED</code>, <code>ADJUST_REASON</code>.
+&#8226; <strong>Issues (table)</strong> (optional) with <code>WARNINGS</code> (e.g. <code>{self.WARN_SEGMENT_SPLIT}</code>, <code>{self.WARN_ODD_PK_IGNORED}</code>) and <code>CRITICALS</code>.
+<hr>
+
+<h3>DETAILS</h3>
+See the plugin README: <a href="https://github.com/Javisionario/L-RAT/blob/main/README_EN.md#64-locate-segments-from-pointsevents-pk-table">Locate segments from points/events (PK) table</a>.
