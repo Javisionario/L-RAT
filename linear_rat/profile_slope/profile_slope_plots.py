@@ -5,13 +5,6 @@ import os
 import shutil
 from typing import Any, Dict, List, Optional
 
-import numpy as np
-
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-from matplotlib.ticker import MultipleLocator, FixedLocator, FixedFormatter, FuncFormatter
-
 from qgis.PyQt.QtCore import QCoreApplication, Qt, QLocale
 from qgis.core import (
     QgsProcessing,
@@ -24,6 +17,13 @@ from qgis.core import (
     QgsProcessingParameterFolderDestination,
 )
 from qgis.PyQt.QtGui import QIcon, QPixmap, QPainter, QFont
+
+np = None
+plt = None
+MultipleLocator = None
+FixedLocator = None
+FixedFormatter = None
+FuncFormatter = None
 
 # =============================================================================
 # UTILIDADES
@@ -440,6 +440,62 @@ class ProfileSlopePlotsAlgorithm(QgsProcessingAlgorithm):
     def createInstance(self) -> "ProfileSlopePlotsAlgorithm":
         return ProfileSlopePlotsAlgorithm()
 
+    def _ensure_plot_dependencies(self) -> None:
+        global np, plt, MultipleLocator, FixedLocator, FixedFormatter, FuncFormatter
+
+        if np is not None and plt is not None:
+            return
+
+        missing = []
+
+        import_errors = []
+
+        try:
+            import numpy as _np
+        except Exception as exc:
+            _np = None
+            missing.append("numpy")
+            import_errors.append(f"numpy: {exc}")
+
+        try:
+            import matplotlib as _matplotlib
+            _matplotlib.use("Agg")
+            import matplotlib.pyplot as _plt
+            from matplotlib.ticker import (
+                MultipleLocator as _MultipleLocator,
+                FixedLocator as _FixedLocator,
+                FixedFormatter as _FixedFormatter,
+                FuncFormatter as _FuncFormatter,
+            )
+        except Exception as exc:
+            _plt = None
+            _MultipleLocator = None
+            _FixedLocator = None
+            _FixedFormatter = None
+            _FuncFormatter = None
+            missing.append("matplotlib")
+            import_errors.append(f"matplotlib: {exc}")
+
+        if missing:
+            packages = ", ".join(missing)
+            details = ""
+            if import_errors:
+                details = self.tr(" Details: {details}").format(details="; ".join(import_errors))
+            raise QgsProcessingException(
+                self.tr(
+                    "Profile Slope Plotter requires the Python package(s): {packages}. "
+                    "Install them in the QGIS Python environment and run this algorithm again."
+                ).format(packages=packages)
+                + details
+            )
+
+        np = _np
+        plt = _plt
+        MultipleLocator = _MultipleLocator
+        FixedLocator = _FixedLocator
+        FixedFormatter = _FixedFormatter
+        FuncFormatter = _FuncFormatter
+
     @staticmethod
     def _to_float(v: Any) -> float:
         try:
@@ -637,6 +693,8 @@ class ProfileSlopePlotsAlgorithm(QgsProcessingAlgorithm):
         plt.close(fig)
 
     def processAlgorithm(self, parameters: Dict[str, Any], context, feedback):
+        self._ensure_plot_dependencies()
+
         source = self.parameterAsSource(parameters, self.INPUT, context)
         if source is None:
             raise QgsProcessingException(self.tr("Could not read the input table/layer."))
