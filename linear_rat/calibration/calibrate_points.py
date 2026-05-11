@@ -200,6 +200,20 @@ class CalibratePoints(QgsProcessingAlgorithm):
         # 0=m, 1=km
         return float(m_value) / 1000.0 if m_units == 0 else float(m_value)
 
+    @staticmethod
+    def _append_unique_field(fields: QgsFields, preferred_name: str, field_type) -> str:
+        """Append a generated field without overwriting existing input fields."""
+        name = preferred_name
+        if fields.indexFromName(name) != -1:
+            base = f"{preferred_name}_LRAT"
+            name = base
+            i = 2
+            while fields.indexFromName(name) != -1:
+                name = f"{base}_{i}"
+                i += 1
+        fields.append(QgsField(name, field_type))
+        return name
+
     # -------------------------
     # Execution
     # -------------------------
@@ -268,29 +282,17 @@ class CalibratePoints(QgsProcessingAlgorithm):
         # ROUTE_ID field copied from lines (optional)
         out_route_field_name = None
         if add_route:
-            out_route_field_name = "ROUTE_ID"
-            if out_fields.indexFromName("ROUTE_ID") != -1:
-                out_route_field_name = "ROUTE_ID_MATCH"
-            out_fields.append(QgsField(out_route_field_name, QVariant.String))
+            route_preferred = "ROUTE_ID"
+            if out_fields.indexFromName(route_preferred) != -1:
+                route_preferred = "ROUTE_ID_MATCH"
+            out_route_field_name = self._append_unique_field(out_fields, route_preferred, QVariant.String)
         
-        # --- Comprobar colisión de nombres de campos en la capa de puntos ---
-        reserved_names = ["PK", "M", "DIST_AXIS", "INCIDENCE", "INC_TYPE"]
-        collisions = [n for n in reserved_names if out_fields.indexFromName(n) != -1]
-
-        if collisions:
-            msg = self.tr(
-                "The input points layer already contains reserved output field name(s): {fields}. "
-            ).format(fields=", ".join(collisions))
-
-            feedback.reportError(msg)
-            raise QgsProcessingException(msg)
-
         # Campos resultantes
-        out_fields.append(QgsField("PK", QVariant.String))         # km+mmm
-        out_fields.append(QgsField("M", QVariant.Double))          # raw M
-        out_fields.append(QgsField("DIST_AXIS", QVariant.Double))  # units of CRS
-        out_fields.append(QgsField("INCIDENCE", QVariant.Int))     # 0/1
-        out_fields.append(QgsField("INC_TYPE", QVariant.String))   # reason
+        self._append_unique_field(out_fields, "PK", QVariant.String)          # km+mmm
+        self._append_unique_field(out_fields, "M", QVariant.Double)           # raw M
+        self._append_unique_field(out_fields, "DIST_AXIS", QVariant.Double)   # units of CRS
+        self._append_unique_field(out_fields, "INCIDENCE", QVariant.Int)      # 0/1
+        self._append_unique_field(out_fields, "INC_TYPE", QVariant.String)    # reason
 
         (sink, sink_id) = self.parameterAsSink(
             parameters,
