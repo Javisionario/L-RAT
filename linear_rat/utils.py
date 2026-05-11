@@ -471,6 +471,20 @@ def extract_segment_from_route_geoms(
     return QgsGeometry(ml), pk_ini, pk_fin, len(pieces), clipped
 
 
+def ensure_multipart_line_geometry(geom: QgsGeometry) -> QgsGeometry:
+    """Return a multipart line geometry, preserving Z/M dimensions."""
+    if geom is None or geom.isEmpty() or geom.isMultipart():
+        return geom
+
+    part = geom.constGet()
+    if part is None or part.isEmpty():
+        return geom
+
+    ml = QgsMultiLineString()
+    ml.addGeometry(part.clone())
+    return QgsGeometry(ml)
+
+
 # ---------------------------------------------------------
 # NEW: helpers for gaps / range / issues (shared pattern)
 # ---------------------------------------------------------

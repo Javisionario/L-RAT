@@ -33,6 +33,7 @@ from ..utils import (
     round3,
     m_range_km,
     extract_segment_from_route_geoms,
+    ensure_multipart_line_geometry,
     global_m_range_km,
     is_pk_covered_by_any_geom,
     nearest_available_m_km,
@@ -391,7 +392,7 @@ class LocateSegmentsFromPKTable(QgsProcessingAlgorithm):
             self.OUTPUT_LINES,
             context,
             out_fields,
-            line_src.wkbType(),
+            QgsWkbTypes.multiType(line_src.wkbType()),
             line_src.sourceCrs(),
         )
 
@@ -607,6 +608,7 @@ class LocateSegmentsFromPKTable(QgsProcessingAlgorithm):
                 dist_pk = round3(pk_distance_km(adj_ini, adj_fin))
                 dist_geom = round3(geom_length_km(seg_geom, line_src.sourceCrs(), context.project()))
 
+                seg_geom = ensure_multipart_line_geometry(seg_geom)
                 out_f = QgsFeature(out_fields)
                 out_f.setGeometry(seg_geom)
                 out_f["ROUTE_ID"] = rid
@@ -626,7 +628,8 @@ class LocateSegmentsFromPKTable(QgsProcessingAlgorithm):
                     for out_name, tf in table_fields_map:
                         out_f[out_name] = rep_row[tf]
 
-                line_sink.addFeature(out_f, QgsFeatureSink.FastInsert)
+                if not line_sink.addFeature(out_f, QgsFeatureSink.FastInsert):
+                    raise QgsProcessingException(self.tr("Could not write the extracted segment to the output layer."))
                 added += 1
                 n_ok += 1
 

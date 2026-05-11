@@ -32,6 +32,7 @@ from ..utils import (
     round3,
     m_range_km,
     extract_segment_from_route_geoms,
+    ensure_multipart_line_geometry,
     # Consistencia con table-based:
     global_m_range_km,
     is_pk_covered_by_any_geom,
@@ -314,7 +315,7 @@ class LocateManualSegments(QgsProcessingAlgorithm):
             self.OUTPUT_LINES,
             context,
             out_fields,
-            line_src.wkbType(),
+            QgsWkbTypes.multiType(line_src.wkbType()),
             line_src.sourceCrs(),
         )
 
@@ -490,6 +491,7 @@ class LocateManualSegments(QgsProcessingAlgorithm):
             dist_pk = round3(pk_distance_km(adj_ini, adj_fin))
             dist_geom = round3(geom_length_km(seg_geom, line_src.sourceCrs(), context.project()))
 
+            seg_geom = ensure_multipart_line_geometry(seg_geom)
             out_f = QgsFeature(out_fields)
             out_f.setGeometry(seg_geom)
             out_f["ROUTE_ID"] = route_id
@@ -503,7 +505,8 @@ class LocateManualSegments(QgsProcessingAlgorithm):
             out_f["ADJUST_REASON"] = adjust_reason
             out_f["N_PIECES"] = int(n_pieces)
             out_f["STATUS"] = "OK"
-            line_sink.addFeature(out_f, QgsFeatureSink.FastInsert)
+            if not line_sink.addFeature(out_f, QgsFeatureSink.FastInsert):
+                raise QgsProcessingException(self.tr("Could not write the extracted segment to the output layer."))
             added += 1
             n_ok += 1
 
